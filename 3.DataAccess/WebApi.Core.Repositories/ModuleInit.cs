@@ -18,23 +18,23 @@ namespace Net.Core.Repositories
     {
         public void Initialize(IModuleRegistrar registrar)
         {
-            registrar.RegisterType<IUnitOfWork, UnitOfWork>();
+            //registrar.RegisterType<IUnitOfWork, UnitOfWork>();
             registrar.RegisterType(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 
-            registrar.RegisterType<IEmailQueueRepository, EmailQueueRepository>();
-            registrar.RegisterType<IPdfQueueRepository, PdfQueueRepository>();
-            registrar.RegisterType<IRequestQueueRepository, RequestQueueRepository>();
-            registrar.RegisterType<IUserRepository, UserRepository>();
-            registrar.RegisterType<IRoleRepository, RoleRepository>();
-            registrar.RegisterType<IExternalLoginRepository, ExternalLoginRepository>();
-            registrar.RegisterType<IRefreshTokenRepository, RefreshTokenRepository>();
-            registrar.RegisterType<IClientRepository, ClientRepository>();
+            //registrar.RegisterType<IEmailQueueRepository, EmailQueueRepository>();
+            //registrar.RegisterType<IPdfQueueRepository, PdfQueueRepository>();
+            //registrar.RegisterType<IRequestQueueRepository, RequestQueueRepository>();
+            //registrar.RegisterType<IUserRepository, UserRepository>();
+            //registrar.RegisterType<IRoleRepository, RoleRepository>();
+            //registrar.RegisterType<IExternalLoginRepository, ExternalLoginRepository>();
+            //registrar.RegisterType<IRefreshTokenRepository, RefreshTokenRepository>();
+            //registrar.RegisterType<IClientRepository, ClientRepository>();
 
-            registrar.RegisterType<ICityRepository, CityRepository>();
-            registrar.RegisterType<ICountryRepository, CountryRepository>();
+            //registrar.RegisterType<ICityRepository, CityRepository>();
+            //registrar.RegisterType<ICountryRepository, CountryRepository>();
 
-            registrar.RegisterType<IKeyGroupRepository, KeyGroupRepository>();
-            registrar.RegisterType<ILocalizationKeyRepository, LocalizationKeyRepository>();
+            //registrar.RegisterType<IKeyGroupRepository, KeyGroupRepository>();
+            //registrar.RegisterType<ILocalizationKeyRepository, LocalizationKeyRepository>();
 
         }
     }

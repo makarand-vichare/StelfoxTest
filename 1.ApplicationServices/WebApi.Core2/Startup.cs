@@ -11,6 +11,12 @@ using System.Reflection;
 using NJsonSchema;
 using Microsoft.AspNetCore.Http;
 using StructureMap;
+using WebApi.Core2.StructureMap;
+using Microsoft.AspNetCore.Diagnostics;
+using WebApi.Core2.BindingModels;
+using WebApi.Core2.ActionFilters;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace WebApi.Core2
 {
@@ -38,11 +44,17 @@ namespace WebApi.Core2
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
-            //_testSecret = Configuration["MySecret"];
-
-            services.AddMvc();
+            services.AddMvc(config =>
+            {
+                // Add XML Content Negotiation
+                config.RespectBrowserAcceptHeader = true;
+                config.InputFormatters.Add(new XmlSerializerInputFormatter());
+                config.OutputFormatters.Add(new XmlSerializerOutputFormatter());
+            });
 
             services.AddApiVersioning(o => o.ApiVersionReader = new HeaderApiVersionReader("api-version"));
+
+            services.ConfigureCors();
 
             services.AddAuthentication().AddFacebook(facebookOptions =>
             {
@@ -80,6 +92,8 @@ namespace WebApi.Core2
 
             services.AddSwagger();
 
+            services.AddScoped<ModelValidationAttribute>();
+
             // Configure the IoC container
             return ConfigureIoC(services);
         }
@@ -87,6 +101,30 @@ namespace WebApi.Core2
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            app.UseExceptionHandler(config =>
+            {
+                config.Run(async context =>
+                {
+                    context.Response.StatusCode = 500;
+                    context.Response.ContentType = "application/json";
+
+                    var error = context.Features.Get<IExceptionHandlerFeature>();
+                    if (error != null)
+                    {
+                        var ex = error.Error;
+
+                        await context.Response.WriteAsync(new ErrorBindingModel
+                        {
+                            StatusCode = 500,
+                            ErrorMessage = ex.Message
+                        }.ToString()); //ToString() is overridden to Serialize object
+                    }
+                });
+            });
+
+
+            //app.UseCustomExceptionMiddleware();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -123,19 +161,17 @@ namespace WebApi.Core2
 
         private IServiceProvider ConfigureIoC(IServiceCollection services)
         {
-            // var container = StructureMapConfig.RegisterComponents();
-
-            var container = new Container();
+             var container = StructureMapConfig.RegisterComponents();
 
             container.Configure(config =>
             {
                 //Populate the container using the service collection
-                config.Scan(_ =>
-                {
-                    _.AssemblyContainingType(typeof(Startup));
-                    _.AssembliesFromPath(".\\bin\\Debug\\netcoreapp2.0");
-                    _.WithDefaultConventions();
-                });
+                //config.Scan(_ =>
+                //{
+                //    _.AssemblyContainingType(typeof(Startup));
+                //    _.AssembliesFromPath(".\\bin\\Debug\\netcoreapp2.0");
+                //    _.WithDefaultConventions();
+                //});
                 //config.For<ICountryService>().Use<CountryService>();
                 //config.For<ICountryRepository>().Use<CountryRepository>();
                 config.Populate(services);

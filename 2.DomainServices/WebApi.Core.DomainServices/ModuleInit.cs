@@ -17,17 +17,17 @@ namespace Net.Core.DomainServices
             registrar.RegisterType(typeof(IUserStore<IdentityUserViewModel>), typeof(CustomUserStore));
             registrar.RegisterType(typeof(IRoleStore<IdentityRoleViewModel>), typeof(CustomRoleStore));
 
-            registrar.RegisterType<IEmailQueueService, EmailQueueService>();
-            registrar.RegisterType<IPdfQueueService, PdfQueueService>();
-            registrar.RegisterType<IRequestQueueService, RequestQueueService>();
+            //registrar.RegisterType<IEmailQueueService, EmailQueueService>();
+            //registrar.RegisterType<IPdfQueueService, PdfQueueService>();
+            //registrar.RegisterType<IRequestQueueService, RequestQueueService>();
 
-            registrar.RegisterType<IClientService, ClientService>();
-            registrar.RegisterType<IRefreshTokenService, RefreshTokenService>();
+            //registrar.RegisterType<IClientService, ClientService>();
+            //registrar.RegisterType<IRefreshTokenService, RefreshTokenService>();
 
-            registrar.RegisterType<ICityService, CityService>();
-            registrar.RegisterType<ICountryService, CountryService>();
+            //registrar.RegisterType<ICityService, CityService>();
+            //registrar.RegisterType<ICountryService, CountryService>();
 
-            registrar.RegisterType<ILocalizationService, LocalizationService>();
+            //registrar.RegisterType<ILocalizationService, LocalizationService>();
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Net.Core.Repositories.Core
 
     public class BaseRepository<EntityModel> : IBaseRepository<EntityModel> where EntityModel : BaseEntity
     {
-        private DataContext dataContext;
+        //private DataContext dataContext;
 
         //protected BaseRepository(DataContext dataContext)
         //{
@@ -31,7 +31,7 @@ namespace Net.Core.Repositories.Core
         {
             get
             {
-                return dataContext.Set<EntityModel>();
+                return ((DataContext)DbContext).Set<EntityModel>();
             }
         }
 
@@ -92,11 +92,11 @@ namespace Net.Core.Repositories.Core
 
         public void Update(EntityModel entity)
         {
-            var entry = dataContext.Entry(entity);
+            var entry = DbContext.Entry(entity);
             if (entry.State == EntityState.Detached)
             {
                 DbSet.Attach(entity);
-                entry = dataContext.Entry(entity);
+                entry = DbContext.Entry(entity);
             }
             entry.State = EntityState.Modified;
         }

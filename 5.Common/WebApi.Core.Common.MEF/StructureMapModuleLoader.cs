@@ -21,6 +21,12 @@ namespace Net.Core.Common.MEF
             var configuration = new ContainerConfiguration().WithAssemblies(assemblies);
             try
             {
+                container.Configure(ct => ct.Scan(scan =>
+                {
+                    scan.WithDefaultConventions();
+                    scan.AssembliesFromApplicationBaseDirectory(assembly => assembly.FullName.Contains("Net.Core."));
+                }));
+
                 using (var componsitionContainer = configuration.CreateContainer())
                 {
                     IEnumerable<IModule> modules = componsitionContainer.GetExports<IModule>().Where(m => m != null);

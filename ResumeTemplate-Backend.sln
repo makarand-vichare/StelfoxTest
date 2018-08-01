@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Net.Core.DomainServices", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Net.Core.IDomainServices", "2.DomainServices\WebApi.Core.IDomainServices\Net.Core.IDomainServices.csproj", "{DDC69D62-69C5-4A2C-B87C-EA681D8E3866}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Net.Core.Mails", "2.DomainServices\WebApi.Core.Mails\Net.Core.Mails.csproj", "{781E721D-1BD3-45E1-8311-4F727BB4887F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Net.Core.eMailTemplates", "2.DomainServices\WebApi.Core.Mails\Net.Core.eMailTemplates.csproj", "{781E721D-1BD3-45E1-8311-4F727BB4887F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Net.Core.RequestResponseModels", "2.DomainServices\WebApi.Core.RequestResponseModels\Net.Core.RequestResponseModels.csproj", "{E0D8F2AF-5511-4E05-A04A-8A6F80F9EF53}"
 EndProject
