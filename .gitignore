@@ -3,3 +3,27 @@
 ################################################################################
 
 /1.ApplicationServices/WebApi.Core2/bin/Debug/netcoreapp2.0
+/1.ApplicationServices/WebApi.Core2/obj
+/2.DomainServices/WebApi.Core.DomainServices/bin
+/2.DomainServices/WebApi.Core.DomainServices/obj
+/2.DomainServices/WebApi.Core.IDomainServices/bin
+/2.DomainServices/WebApi.Core.IDomainServices/obj
+/2.DomainServices/WebApi.Core.Mails/bin
+/2.DomainServices/WebApi.Core.Mails/obj
+/2.DomainServices/WebApi.Core.RequestResponseModels/bin
+/2.DomainServices/WebApi.Core.RequestResponseModels/obj
+/2.DomainServices/WebApi.Core.ViewModels/bin
+/2.DomainServices/WebApi.Core.ViewModels/obj
+/3.DataAccess/WebApi.Core.EntityModels/bin
+/3.DataAccess/WebApi.Core.EntityModels/obj
+/3.DataAccess/WebApi.Core.IRepositories/bin
+/3.DataAccess/WebApi.Core.IRepositories/obj
+/3.DataAccess/WebApi.Core.Repositories/bin
+/3.DataAccess/WebApi.Core.Repositories/obj
+/4.InfraStructure/WebApi.Core.Infrastructure/bin
+/4.InfraStructure/WebApi.Core.Infrastructure/obj
+/5.Common/WebApi.Core.Common.MEF/bin
+/5.Common/WebApi.Core.Common.MEF/obj
+/5.Common/WebApi.Core.Common.Utility/bin
+/5.Common/WebApi.Core.Common.Utility/obj
+/.vs/ResumeTemplate-Backend

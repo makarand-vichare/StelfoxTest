@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="structuremap" Version="4.5.2" />
+    <PackageReference Include="System.Composition.AttributedModel" Version="1.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\3.DataAccess\WebApi.Core.EntityModels\Net.Core.EntityModels.csproj" />
+    <ProjectReference Include="..\..\3.DataAccess\WebApi.Core.IRepositories\Net.Core.IRepositories.csproj" />
+    <ProjectReference Include="..\..\4.InfraStructure\WebApi.Core.Infrastructure\Net.Core.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\5.Common\WebApi.Core.Common.MEF\Net.Core.MEF.csproj" />
+    <ProjectReference Include="..\..\5.Common\WebApi.Core.Common.Utility\Net.Core.Utility.csproj" />
+    <ProjectReference Include="..\WebApi.Core.IDomainServices\Net.Core.IDomainServices.csproj" />
+    <ProjectReference Include="..\WebApi.Core.Mails\Net.Core.Mails.csproj" />
+    <ProjectReference Include="..\WebApi.Core.RequestResponseModels\Net.Core.RequestResponseModels.csproj" />
+    <ProjectReference Include="..\WebApi.Core.ViewModels\Net.Core.ViewModels.csproj" />
+  </ItemGroup>
+
+</Project>
