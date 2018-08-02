@@ -17,6 +17,11 @@ using WebApi.Core2.BindingModels;
 using WebApi.Core2.ActionFilters;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
+using System.IO;
+using NLog;
+using WebApi.Core2.Middleware;
+using WebApi.Core2.ContentNegotiationFormatters;
 
 namespace WebApi.Core2
 {
@@ -24,6 +29,8 @@ namespace WebApi.Core2
     {
         public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
+            LogManager.LoadConfiguration(String.Concat(Directory.GetCurrentDirectory(), "/nlog.config"));
+
             Configuration = configuration;
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
@@ -50,11 +57,16 @@ namespace WebApi.Core2
                 config.RespectBrowserAcceptHeader = true;
                 config.InputFormatters.Add(new XmlSerializerInputFormatter());
                 config.OutputFormatters.Add(new XmlSerializerOutputFormatter());
+                config.OutputFormatters.Add(new CsvOutputFormatter());
             });
 
             services.AddApiVersioning(o => o.ApiVersionReader = new HeaderApiVersionReader("api-version"));
 
             services.ConfigureCors();
+
+            services.ConfigureLoggerService();
+
+            services.ConfigureIISIntegration();
 
             services.AddAuthentication().AddFacebook(facebookOptions =>
             {
@@ -122,15 +134,21 @@ namespace WebApi.Core2
                 });
             });
 
-
-            //app.UseCustomExceptionMiddleware();
+            app.ConfigureCustomExceptionMiddleware();
 
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseCors("CorsPolicy");
+
             app.UseAuthentication();
+
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.All
+            });
 
             // Enable the Swagger UI middleware and the Swagger generator
             app.UseSwaggerUi(typeof(Startup).GetTypeInfo().Assembly, settings =>

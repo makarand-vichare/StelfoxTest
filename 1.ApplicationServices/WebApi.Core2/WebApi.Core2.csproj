@@ -16,6 +16,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="2.3.0" />
+    <PackageReference Include="NLog" Version="4.5.7" />
     <PackageReference Include="NSwag.AspNetCore" Version="11.18.0" />
     <PackageReference Include="StructureMap.Microsoft.DependencyInjection" Version="1.4.0" />
   </ItemGroup>
@@ -27,6 +28,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\2.DomainServices\WebApi.Core.IDomainServices\Net.Core.IDomainServices.csproj" />
     <ProjectReference Include="..\..\2.DomainServices\WebApi.Core.ViewModels\Net.Core.ViewModels.csproj" />
+    <ProjectReference Include="..\..\4.InfraStructure\WebApi.Core.Infrastructure\Net.Core.Infrastructure.csproj" />
     <ProjectReference Include="..\..\5.Common\WebApi.Core.Common.MEF\Net.Core.MEF.csproj" />
   </ItemGroup>
 
