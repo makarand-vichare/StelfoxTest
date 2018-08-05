@@ -1,4 +1,6 @@
-﻿namespace Net.Core.ViewModels.Identity.WebApi
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Net.Core.ViewModels.Identity.WebApi
 {
     public class ExternalLoginViewModel 
     {
@@ -7,6 +9,10 @@
         public string Url { get; set; }
 
         public string State { get; set; }
+
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; }
     }
 
 }
