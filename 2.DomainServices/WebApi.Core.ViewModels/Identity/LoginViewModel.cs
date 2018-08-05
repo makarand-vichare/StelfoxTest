@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using Net.Core.Utility;
 using Net.Core.ViewModels.Core;
 
-namespace DatingSite.ViewModels
+namespace Net.Core.ViewModels
 {
     [Serializable]
     public class LoginViewModel : BaseViewModel
@@ -21,6 +21,10 @@ namespace DatingSite.ViewModels
         [DataType(DataType.Password)]
         [DisplayName("Password")]
         public string Password { get; set; }
+
+        [Required]
+        [DisplayName("RememberMe")]
+        public bool RememberMe { get; set; }
 
     }
 

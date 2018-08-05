@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using WebApi.Core2.Middleware;
 
 public static class MiddlewareCustomExceptionExtension
 {
-    public static void ConfigureCustomExceptionMiddleware(this IApplicationBuilder app)
+    public static void ConfigureCustomExceptionMiddleware(this IApplicationBuilder app, IHostingEnvironment env)
     {
+        if (env.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
+        }
         app.UseMiddleware<CustomExceptionMiddleware>();
     }
 }

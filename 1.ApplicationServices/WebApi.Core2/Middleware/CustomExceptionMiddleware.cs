@@ -43,6 +43,7 @@ namespace WebApi.Core2.Middleware
                 StatusCode = context.Response.StatusCode,
                 ErrorMessage = "Internal Server Error from the custom middleware."
             }.ToString());
+
         }
     }
 }

@@ -345,7 +345,7 @@ namespace Net.Core.DomainServices.IdentityStores
             if (viewModel == null)
                 throw new ArgumentNullException("user");
 
-            var model = unitOfWork.UserRepository.FindById(viewModel.Id);
+            var model = unitOfWork.UserRepository.FindByEmail(viewModel.Email);
             if (model == null)
                 throw new ArgumentException("IdentityUserViewModel does not correspond to a User entity.", "user");
 

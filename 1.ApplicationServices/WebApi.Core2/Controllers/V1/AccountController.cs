@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Net.Core.IDomainServices.IdentityStores;
 using Net.Core.ViewModels.Identity.WebApi;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -23,21 +26,6 @@ namespace WebApi.Core2.Controllers.V1
     {
         private UserManager<IdentityUserViewModel> userManager;
         private SignInManager<IdentityUserViewModel> signInManager;
-
-        //private AuthenticationManager AuthenticationManager => ;
-
-        //private UserManager<IdentityUserViewModel> UserManager
-        //{
-        //    get
-        //    {
-        //        return _userManager ?? AuthenticationHttpContextExtensions.GetUserManager<UserManager<IdentityUserViewModel>>();
-        //    }
-        //     set
-        //    {
-        //        _userManager = value;
-        //    }
-        //}
-
         private readonly IClientService clientService;
 
         public AccountController(UserManager<IdentityUserViewModel> _userManager,
@@ -72,12 +60,12 @@ namespace WebApi.Core2.Controllers.V1
 
             IdentityResult result = await userManager.CreateAsync(user, model.Password);
 
-            IActionResult errorResult = GetErrorResult(result);
+            //IActionResult errorResult = GetErrorResult(result);
 
-            if (errorResult != null)
-            {
-                return errorResult;
-            }
+            //if (errorResult != null)
+            //{
+            //    return errorResult;
+            //}
 
             return Ok();
         }
@@ -85,189 +73,183 @@ namespace WebApi.Core2.Controllers.V1
         // GET api/Account/ExternalLogin
         //[OverrideAuthentication]
         //[HostAuthentication(DefaultAuthenticationTypes.ExternalCookie)]
-        //[AllowAnonymous]
-        //[Route("ExternalLogin", Name = "ExternalLogin")]
-        //public async Task<IActionResult> GetExternalLogin(string provider, string error = null)
-        //{
-        //    string redirectUri = string.Empty;
-
-        //    if (error != null)
-        //    {
-        //        return BadRequest(Uri.EscapeDataString(error));
-        //    }
-
-        //    if (!User.Identity.IsAuthenticated)
-        //    {
-        //        return new ChallengeResult(provider);
-        //    }
-
-        //    var redirectUriValidationResult = ValidateClientAndRedirectUri(Request, ref redirectUri);
-
-        //    if (!string.IsNullOrWhiteSpace(redirectUriValidationResult))
-        //    {
-        //        return BadRequest(redirectUriValidationResult);
-        //    }
-
-        //    ExternalLoginData externalLogin = ExternalLoginData.FromIdentity(User.Identity as ClaimsIdentity);
-
-        //    if (externalLogin == null)
-        //    {
-        //        return BadRequest();
-        //    }
-
-        //    if (externalLogin.LoginProvider != provider)
-        //    {
-        //        await AuthenticationHttpContextExtensions.SignOutAsync(HttpContext, IdentityConstants.ExternalScheme);
-        //        return new ChallengeResult(provider);
-        //    }
-
-        //    var user = await userManager.FindByLoginAsync(externalLogin.LoginProvider, externalLogin.ProviderKey);
-
-        //    bool hasRegistered = user != null;
-
-        //    var emailExternalLogin = await GetEmailExternalLogin(externalLogin.LoginProvider, externalLogin.ExternalAccessToken);
-        //    if (emailExternalLogin != null)
-        //    {
-        //        externalLogin.Email = emailExternalLogin.email;
-        //    }
-
-        //    redirectUri = string.Format("{0}?external_access_token={1}&provider={2}&haslocalaccount={3}&external_user_name={4}&email={5}",
-        //                                    redirectUri,
-        //                                    externalLogin.ExternalAccessToken,
-        //                                    externalLogin.LoginProvider,
-        //                                    hasRegistered.ToString(),
-        //                                    externalLogin.UserName,
-        //                                    externalLogin.Email);
-
-        //    return Redirect(redirectUri);
-
-        //}
-
-        // POST api/Account/RegisterExternal
-        //[AllowAnonymous]
-        //[Route("RegisterExternal")]
-        //public async Task<IActionResult> RegisterExternal(RegisterExternalBindingModel model)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest(ModelState);
-        //    }
-
-        //    var verifiedAccessToken = await VerifyExternalAccessToken(model.Provider, model.ExternalAccessToken);
-        //    if (verifiedAccessToken == null)
-        //    {
-        //        return BadRequest("Invalid Provider or External Access Token");
-        //    }
-
-        //    var user = await userManager.FindByLoginAsync(model.Provider, verifiedAccessToken.user_id);
-
-        //    bool hasRegistered = user != null;
-
-        //    if (hasRegistered)
-        //    {
-        //        return BadRequest("External user is already registered");
-        //    }
-
-        //    user = new IdentityUserViewModel() { UserName = model.UserName, DateOfBirth = DateTime.Now , Email = model.Email};
-
-        //    IdentityResult result = await userManager.CreateAsync(user);
-        //    if (!result.Succeeded)
-        //    {
-        //        return GetErrorResult(result);
-        //    }
-
-        //    result = await userManager.AddLoginAsync(user, new UserLoginInfo(model.Provider, verifiedAccessToken.user_id, model.UserName));
-        //    if (!result.Succeeded)
-        //    {
-        //        return GetErrorResult(result);
-        //    }
-
-        //    //generate access token response
-        //    var accessTokenResponse = "";//GenerateLocalAccessTokenResponse(model.UserName);
-
-        //    return Ok(accessTokenResponse);
-        //}
-
-        //[AllowAnonymous]
-        //[HttpGet]
-        //[Route("ObtainLocalAccessToken")]
-        //public async Task<IActionResult> ObtainLocalAccessToken(string provider, string externalAccessToken)
-        //{
-
-        //    if (string.IsNullOrWhiteSpace(provider) || string.IsNullOrWhiteSpace(externalAccessToken))
-        //    {
-        //        return BadRequest("Provider or external access token is not sent");
-        //    }
-
-        //    var verifiedAccessToken = await VerifyExternalAccessToken(provider, externalAccessToken);
-        //    if (verifiedAccessToken == null)
-        //    {
-        //        return BadRequest("Invalid Provider or External Access Token");
-        //    }
-
-        //    var user = await userManager.FindByLoginAsync(provider, verifiedAccessToken.user_id);
-
-        //    bool hasRegistered = user != null;
-
-        //    if (!hasRegistered)
-        //    {
-        //        return BadRequest("External user is not registered");
-        //    }
-
-        //    //generate access token response
-        //    var accessTokenResponse = "";// GenerateLocalAccessTokenResponse(user.UserName);
-
-        //    return Ok(accessTokenResponse);
-
-        //}
-
-        //protected override void Dispose(bool disposing)
-        //{
-        //    if (disposing)
-        //    {
-        //        userManager.Dispose();
-        //    }
-
-        //    base.Dispose(disposing);
-        //}
-
-        #region Helpers
-
-        private IActionResult GetErrorResult(IdentityResult result)
+        [AllowAnonymous]
+        [Route("ExternalLogin", Name = "ExternalLogin")]
+        public async Task<IActionResult> GetExternalLogin(string provider, string error = null)
         {
-            if (result == null)
+            string redirectUri = string.Empty;
+
+            if (error != null)
             {
-                return BadRequest();
+                return BadRequest(Uri.EscapeDataString(error));
             }
 
-            if (!result.Succeeded)
+            if (!User.Identity.IsAuthenticated)
             {
-                if (result.Errors != null)
-                {
-                    foreach (var error in result.Errors)
-                    {
-                        ModelState.AddModelError("", error.Description);
-                    }
-                }
+                return new ChallengeResult();
+            }
 
-                if (ModelState.IsValid)
-                {
-                    // No ModelState errors are available to send, so just return an empty BadRequest.
-                    return BadRequest();
-                }
+            var redirectUriValidationResult = ValidateClientAndRedirectUri(this.Request, ref redirectUri);
 
+            if (!string.IsNullOrWhiteSpace(redirectUriValidationResult))
+            {
+                return BadRequest(redirectUriValidationResult);
+            }
+
+            ExternalLoginData externalLogin = ExternalLoginData.FromIdentity(User.Identity as ClaimsIdentity);
+
+            //if (externalLogin == null)
+            //{
+            //    return InternalError();
+            //}
+
+            if (externalLogin.LoginProvider != provider)
+            {
+                await signInManager.SignOutAsync();
+                return new ChallengeResult(provider);
+            }
+
+            var user = await userManager.FindByLoginAsync(externalLogin.LoginProvider, externalLogin.ProviderKey);
+
+            bool hasRegistered = user != null;
+
+            var emailExternalLogin = await GetEmailExternalLogin(externalLogin.LoginProvider, externalLogin.ExternalAccessToken);
+            if (emailExternalLogin != null)
+            {
+                externalLogin.Email = emailExternalLogin.email;
+            }
+
+            redirectUri = string.Format("{0}?external_access_token={1}&provider={2}&haslocalaccount={3}&external_user_name={4}&email={5}",
+                                            redirectUri,
+                                            externalLogin.ExternalAccessToken,
+                                            externalLogin.LoginProvider,
+                                            hasRegistered.ToString(),
+                                            externalLogin.UserName,
+                                            externalLogin.Email);
+
+            return Redirect(redirectUri);
+
+        }
+
+        // POST api/Account/RegisterExternal
+        [AllowAnonymous]
+        [Route("RegisterExternal")]
+        [HttpPost]
+        public async Task<IActionResult> RegisterExternal(RegisterExternalBindingModel model)
+        {
+            if (!ModelState.IsValid)
+            {
                 return BadRequest(ModelState);
             }
 
-            return null;
+            model.UserName = "U" + DateTime.Now.Ticks;
+            var verifiedAccessToken = await VerifyExternalAccessToken(model.Provider, model.ExternalAccessToken);
+            if (verifiedAccessToken == null)
+            {
+                return BadRequest("Invalid Provider or External Access Token");
+            }
+
+            var user = await userManager.FindByLoginAsync(model.Provider, verifiedAccessToken.user_id);
+
+            bool hasRegistered = user != null;
+
+            if (hasRegistered)
+            {
+                return BadRequest("External user is already registered");
+            }
+
+            user = new IdentityUserViewModel() { UserName = model.UserName, Email = model.Email };
+
+            IdentityResult result = await userManager.CreateAsync(user);
+            //if (!result.Succeeded)
+            //{
+            //    return GetErrorResult(result);
+            //}
+
+            var userLoginInfo = new UserLoginInfo(model.Provider, verifiedAccessToken.user_id, model.Email);
+
+            result = await userManager.AddLoginAsync(user, userLoginInfo);
+            //if (!result.Succeeded)
+            //{
+            //    return GetErrorResult(result);
+            //}
+
+            //generate access token response
+            var accessTokenResponse = GenerateLocalAccessTokenResponse(model.UserName);
+
+            return Ok(accessTokenResponse);
         }
 
-        private string ValidateClientAndRedirectUri(HttpRequestMessage request, ref string redirectUriOutput)
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("ObtainLocalAccessToken")]
+        public async Task<IActionResult> ObtainLocalAccessToken(string provider, string externalAccessToken)
+        {
+
+            if (string.IsNullOrWhiteSpace(provider) || string.IsNullOrWhiteSpace(externalAccessToken))
+            {
+                return BadRequest("Provider or external access token is not sent");
+            }
+
+            var verifiedAccessToken = await VerifyExternalAccessToken(provider, externalAccessToken);
+            if (verifiedAccessToken == null)
+            {
+                return BadRequest("Invalid Provider or External Access Token");
+            }
+
+            var user = await userManager.FindByLoginAsync(provider, verifiedAccessToken.user_id);
+
+            bool hasRegistered = user != null;
+
+            if (!hasRegistered)
+            {
+                return BadRequest("External user is not registered");
+            }
+
+            //generate access token response
+            var accessTokenResponse = GenerateLocalAccessTokenResponse(user.UserName);
+
+            return Ok(accessTokenResponse);
+
+        }
+
+        #region Helpers
+
+        //private IActionResult GetErrorResult(IdentityResult result)
+        //{
+        //    //if (result == null)
+        //    //{
+        //    //    return InternalServerError();
+        //    //}
+
+        //    if (!result.Succeeded)
+        //    {
+        //        if (result.Errors != null)
+        //        {
+        //            foreach (string error in result.Errors)
+        //            {
+        //                ModelState.AddModelError("", error);
+        //            }
+        //        }
+
+        //        if (ModelState.IsValid)
+        //        {
+        //            // No ModelState errors are available to send, so just return an empty BadRequest.
+        //            return BadRequest();
+        //        }
+
+        //        return BadRequest(ModelState);
+        //    }
+
+        //    return null;
+        //}
+
+        private string ValidateClientAndRedirectUri(HttpRequest request, ref string redirectUriOutput)
         {
 
             Uri redirectUri;
 
-            var redirectUriString = GetQueryString(request, "redirect_uri") + "#/redirector";
+            var redirectUriString = GetQueryString(Request, "redirect_uri") + "#/redirector";
 
             if (string.IsNullOrWhiteSpace(redirectUriString))
             {
@@ -281,7 +263,7 @@ namespace WebApi.Core2.Controllers.V1
                 return "redirect_uri is invalid";
             }
 
-            var clientId = GetQueryString(request, "client_id");
+            var clientId = GetQueryString(Request, "client_id");
 
             if (string.IsNullOrWhiteSpace(clientId))
             {
@@ -306,178 +288,171 @@ namespace WebApi.Core2.Controllers.V1
 
         }
 
-        private string GetQueryString(HttpRequestMessage request, string key)
+        private string GetQueryString(HttpRequest request, string key)
         {
-            //var queryStrings = request.GetQueryNameValuePairs();
+            if (!request.Query.ContainsKey(key)) return null;
 
-            //if (queryStrings == null) return null;
-
-            //var match = queryStrings.FirstOrDefault(keyValue => string.Compare(keyValue.Key, key, true) == 0);
-
-            //if (string.IsNullOrEmpty(match.Value)) return null;
-
-            //return match.Value;
-
-            return string.Empty;
+            return request.Query[key];
         }
 
-        //private async Task<ParsedExternalAccessToken> VerifyExternalAccessToken(string provider, string accessToken)
-        //{
-        //    ParsedExternalAccessToken parsedToken = null;
+        private async Task<ParsedExternalAccessToken> VerifyExternalAccessToken(string provider, string accessToken)
+        {
+            ParsedExternalAccessToken parsedToken = null;
 
-        //    var verifyTokenEndPoint = "";
+            var verifyTokenEndPoint = "";
 
-        //    if (provider == "Facebook")
-        //    {
-        //        //You can get it from here: https://developers.facebook.com/tools/accesstoken/
-        //        //More about debug_tokn here: http://stackoverflow.com/questions/16641083/how-does-one-get-the-app-access-token-for-debug-token-inspection-on-facebook
-        //        var appToken = "289207288125802|aJI-5DCcnJyrxM6ne4d2gn2ppDc";
-        //        verifyTokenEndPoint = string.Format("https://graph.facebook.com/debug_token?input_token={0}&access_token={1}", accessToken, appToken);
-        //    }
-        //    else if (provider == "Google")
-        //    {
-        //        verifyTokenEndPoint = string.Format("https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={0}", accessToken);
-        //    }
-        //    else
-        //    {
-        //        return null;
-        //    }
+            if (provider == "Facebook")
+            {
+                //You can get it from here: https://developers.facebook.com/tools/accesstoken/
+                //More about debug_tokn here: http://stackoverflow.com/questions/16641083/how-does-one-get-the-app-access-token-for-debug-token-inspection-on-facebook
+                var appToken = "289207288125802|aJI-5DCcnJyrxM6ne4d2gn2ppDc";
+                verifyTokenEndPoint = string.Format("https://graph.facebook.com/debug_token?input_token={0}&access_token={1}", accessToken, appToken);
+            }
+            else if (provider == "Google")
+            {
+                verifyTokenEndPoint = string.Format("https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={0}", accessToken);
+            }
+            else
+            {
+                return null;
+            }
 
-        //    var client = new HttpClient();
-        //    var uri = new Uri(verifyTokenEndPoint);
-        //    var response = await client.GetAsync(uri);
+            var client = new HttpClient();
+            var uri = new Uri(verifyTokenEndPoint);
+            var response = await client.GetAsync(uri);
 
-        //    if (response.IsSuccessStatusCode)
-        //    {
-        //        var content = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
 
-        //        dynamic jObj = (JObject)Newtonsoft.Json.JsonConvert.DeserializeObject(content);
+                dynamic jObj = (JObject)Newtonsoft.Json.JsonConvert.DeserializeObject(content);
 
-        //        parsedToken = new ParsedExternalAccessToken();
+                parsedToken = new ParsedExternalAccessToken();
 
-        //        if (provider == "Facebook")
-        //        {
-        //            parsedToken.user_id = jObj["data"]["user_id"];
-        //            parsedToken.app_id = jObj["data"]["app_id"];
+                if (provider == "Facebook")
+                {
+                    parsedToken.user_id = jObj["data"]["user_id"];
+                    parsedToken.app_id = jObj["data"]["app_id"];
 
-        //            if (!string.Equals(Startup.facebookAuthOptions.AppId, parsedToken.app_id, StringComparison.OrdinalIgnoreCase))
-        //            {
-        //                return null;
-        //            }
-        //        }
-        //        else if (provider == "Google")
-        //        {
-        //            parsedToken.user_id = jObj["user_id"];
-        //            parsedToken.app_id = jObj["audience"];
+                    //if (!string.Equals(Startup.facebookAuthOptions.AppId, parsedToken.app_id, StringComparison.OrdinalIgnoreCase))
+                    //{
+                    //    return null;
+                    //}
+                }
+                else if (provider == "Google")
+                {
+                    parsedToken.user_id = jObj["user_id"];
+                    parsedToken.app_id = jObj["audience"];
 
-        //            if (!string.Equals(Startup.googleAuthOptions.ClientId, parsedToken.app_id, StringComparison.OrdinalIgnoreCase))
-        //            {
-        //                return null;
-        //            }
+                    //if (!string.Equals(Startup.googleAuthOptions.ClientId, parsedToken.app_id, StringComparison.OrdinalIgnoreCase))
+                    //{
+                    //    return null;
+                    //}
 
-        //        }
+                }
 
-        //    }
+            }
 
-        //    return parsedToken;
-        //}
+            return parsedToken;
+        }
 
-        //private async Task<ExternalLoginEmailInfo> GetEmailExternalLogin(string provider, string accessToken)
-        //{
-        //    ExternalLoginEmailInfo externalLoginEmail = null;
+        private async Task<ExternalLoginEmailInfo> GetEmailExternalLogin(string provider, string accessToken)
+        {
+            ExternalLoginEmailInfo externalLoginEmail = null;
 
-        //    var getEmailEndPoint = "";
+            var getEmailEndPoint = "";
 
-        //    if (provider == "Facebook")
-        //    {
-        //        var appToken = "589067647936345|_f8Z3IuWCFHjeypMb2cDr5tCkk0";
-        //        getEmailEndPoint = string.Format("https://graph.facebook.com/v2.5/me?access_token={0}", accessToken);
-        //    }
-        //    else if (provider == "Google")
-        //    {
-        //        getEmailEndPoint = string.Format("https://www.googleapis.com/oauth2/v1/me?access_token={0}", accessToken);
-        //    }
-        //    else
-        //    {
-        //        return null;
-        //    }
+            if (provider == "Facebook")
+            {
+                // var appToken = "589067647936345|_f8Z3IuWCFHjeypMb2cDr5tCkk0";
+                getEmailEndPoint = string.Format("https://graph.facebook.com/v2.5/me?access_token={0}", accessToken);
+            }
+            else if (provider == "Google")
+            {
+                getEmailEndPoint = string.Format("https://www.googleapis.com/oauth2/v1/me?access_token={0}", accessToken);
+            }
+            else
+            {
+                return null;
+            }
 
-        //    var client = new HttpClient();
-        //    var uri = new Uri(getEmailEndPoint);
-        //    var response = await client.GetAsync(uri);
+            var client = new HttpClient();
+            var uri = new Uri(getEmailEndPoint);
+            var response = await client.GetAsync(uri);
 
-        //    if (response.IsSuccessStatusCode)
-        //    {
-        //        var content = await response.Content.ReadAsStringAsync();
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
 
-        //        dynamic jObj = (JObject)Newtonsoft.Json.JsonConvert.DeserializeObject(content);
+                dynamic jObj = (JObject)Newtonsoft.Json.JsonConvert.DeserializeObject(content);
 
-        //        externalLoginEmail = new ExternalLoginEmailInfo();
+                externalLoginEmail = new ExternalLoginEmailInfo();
 
-        //        if (provider == "Facebook")
-        //        {
-        //           if (jObj.Property("email") != null)
-        //            {
-        //                externalLoginEmail.email = jObj.Property("email").Value;
-        //            }
+                if (provider == "Facebook")
+                {
+                    if (jObj.Property("email") != null)
+                    {
+                        externalLoginEmail.email = jObj.Property("email").Value;
+                    }
 
-        //            if (jObj.Property("app_id") != null)
-        //            {
-        //                externalLoginEmail.app_id = jObj.Property("app_id").Value;
-        //            }
+                    if (jObj.Property("app_id") != null)
+                    {
+                        externalLoginEmail.app_id = jObj.Property("app_id").Value;
+                    }
 
-        //            if (!string.Equals(Startup.facebookAuthOptions.AppId, externalLoginEmail.app_id, StringComparison.OrdinalIgnoreCase))
-        //            {
-        //                return null;
-        //            }
-        //        }
-        //        else if (provider == "Google")
-        //        {
-        //            externalLoginEmail.email = jObj["user_id"];
-        //            externalLoginEmail.app_id = jObj["audience"];
+                    //if (!string.Equals(Startup.facebookAuthOptions.AppId, externalLoginEmail.app_id, StringComparison.OrdinalIgnoreCase))
+                    //{
+                    //    return null;
+                    //}
+                }
+                else if (provider == "Google")
+                {
+                    externalLoginEmail.email = jObj["user_id"];
+                    externalLoginEmail.app_id = jObj["audience"];
 
-        //            if (!string.Equals(Startup.googleAuthOptions.ClientId, externalLoginEmail.app_id, StringComparison.OrdinalIgnoreCase))
-        //            {
-        //                return null;
-        //            }
+                    //if (!string.Equals(Startup.googleAuthOptions.ClientId, externalLoginEmail.app_id, StringComparison.OrdinalIgnoreCase))
+                    //{
+                    //    return null;
+                    //}
 
-        //        }
+                }
 
-        //    }
+            }
 
-        //    return externalLoginEmail;
-        //}
+            return externalLoginEmail;
+        }
 
-        //private JObject GenerateLocalAccessTokenResponse(string userName)
-        //{
-        //    var tokenExpiration = TimeSpan.FromDays(1);
+        private JObject GenerateLocalAccessTokenResponse(string userName)
+        {
+            var tokenExpiration = TimeSpan.FromDays(1);
 
-        //    ClaimsIdentity identity = new ClaimsIdentity(CookieAuthenticationDefaults.AuthenticationScheme);
+            ClaimsIdentity identity = new ClaimsIdentity();
 
-        //    identity.AddClaim(new Claim(ClaimTypes.Name, userName));
-        //    identity.AddClaim(new Claim("role", "user"));
+            identity.AddClaim(new Claim(ClaimTypes.Name, userName));
+            identity.AddClaim(new Claim("role", "user"));
 
-        //    var props = new Microsoft.AspNetCore.Authentication.AuthenticationProperties()
-        //    {
-        //        IssuedUtc = DateTime.UtcNow,
-        //        ExpiresUtc = DateTime.UtcNow.Add(tokenExpiration),
-        //    };
+            var props = new AuthenticationProperties()
+            {
+                IssuedUtc = DateTime.UtcNow,
+                ExpiresUtc = DateTime.UtcNow.Add(tokenExpiration),
+            };
+            var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        //    var ticket = new AuthenticationTicket(identity, props);
+            var ticket = new AuthenticationTicket(claimsPrincipal, props, string.Empty);
 
-        //    var accessToken = Startup.OAuthBearerOptions.AccessTokenFormat.Protect(ticket);
+            var accessToken = ""; // Startup.OAuthBearerOptions.AccessTokenFormat.Protect(ticket);
 
-        //    JObject tokenResponse = new JObject(
-        //                                new JProperty("userName", userName),
-        //                                new JProperty("access_token", accessToken),
-        //                                new JProperty("token_type", "bearer"),
-        //                                new JProperty("expires_in", tokenExpiration.TotalSeconds.ToString()),
-        //                                new JProperty(".issued", ticket.Properties.IssuedUtc.ToString()),
-        //                                new JProperty(".expires", ticket.Properties.ExpiresUtc.ToString())
-        //);
+            JObject tokenResponse = new JObject(
+                                        new JProperty("userName", userName),
+                                        new JProperty("access_token", accessToken),
+                                        new JProperty("token_type", "bearer"),
+                                        new JProperty("expires_in", tokenExpiration.TotalSeconds.ToString()),
+                                        new JProperty(".issued", ticket.Properties.IssuedUtc.ToString()),
+                                        new JProperty(".expires", ticket.Properties.ExpiresUtc.ToString())
+        );
 
-        //    return tokenResponse;
-        //}
+            return tokenResponse;
+        }
 
         private class ExternalLoginData
         {
@@ -523,8 +498,8 @@ namespace WebApi.Core2.Controllers.V1
                 {
                     LoginProvider = providerKeyClaim.Issuer,
                     ProviderKey = providerKeyClaim.Value,
-                    UserName = identity.FindFirst(o => o.ValueType == ClaimTypes.Name).Value,
-                    ExternalAccessToken = identity.FindFirst(o => o.Type == "ExternalAccessToken").Value
+                    UserName = identity.FindFirst(ClaimTypes.Name).Value,
+                    ExternalAccessToken = identity.FindFirst("ExternalAccessToken").Value,
                 };
             }
         }

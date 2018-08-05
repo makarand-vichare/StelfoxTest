@@ -59,142 +59,41 @@ namespace WebApi.Core2
                 config.OutputFormatters.Add(new XmlSerializerOutputFormatter());
                 config.OutputFormatters.Add(new CsvOutputFormatter());
             });
-
             services.AddApiVersioning(o => o.ApiVersionReader = new HeaderApiVersionReader("api-version"));
-
             services.ConfigureCors();
-
             services.ConfigureLoggerService();
-
             services.ConfigureIISIntegration();
-
-            services.AddAuthentication().AddFacebook(facebookOptions =>
-            {
-                facebookOptions.AppId = Configuration["Authentication:Facebook:AppId"];
-                facebookOptions.AppSecret = Configuration["Authentication:Facebook:AppSecret"];
-            });
-
-            services.AddAuthentication().AddGoogle(googleOptions =>
-            {
-                googleOptions.ClientId = Configuration["Authentication:Google:ClientId"];
-                googleOptions.ClientSecret = Configuration["Authentication:Google:ClientSecret"];
-            });
-
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = "Jwt";
-                options.DefaultChallengeScheme = "Jwt";
-            }).AddJwtBearer("Jwt", options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateAudience = false,
-                    //ValidAudience = "the audience you want to validate",
-                    ValidateIssuer = false,
-                    //ValidIssuer = "the isser you want to validate",
-
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("the secret that needs to be at least 16 characeters long for HmacSha256")),
-
-                    ValidateLifetime = true, //validate the expiration and not before values in the token
-
-                    ClockSkew = TimeSpan.FromMinutes(5) //5 minute tolerance for the expiration date
-                };
-            });
-
+            services.ConfigureAuthentication(Configuration);
             services.AddSwagger();
-
             services.AddScoped<ModelValidationAttribute>();
-
-            // Configure the IoC container
-            return ConfigureIoC(services);
+            return services.ConfigureIoc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            app.UseExceptionHandler(config =>
-            {
-                config.Run(async context =>
-                {
-                    context.Response.StatusCode = 500;
-                    context.Response.ContentType = "application/json";
 
-                    var error = context.Features.Get<IExceptionHandlerFeature>();
-                    if (error != null)
-                    {
-                        var ex = error.Error;
-
-                        await context.Response.WriteAsync(new ErrorBindingModel
-                        {
-                            StatusCode = 500,
-                            ErrorMessage = ex.Message
-                        }.ToString()); //ToString() is overridden to Serialize object
-                    }
-                });
-            });
-
-            app.ConfigureCustomExceptionMiddleware();
-
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
+            app.ConfigureCustomExceptionMiddleware(env);
             app.UseCors("CorsPolicy");
-
             app.UseAuthentication();
-
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.All
             });
-
-            // Enable the Swagger UI middleware and the Swagger generator
-            app.UseSwaggerUi(typeof(Startup).GetTypeInfo().Assembly, settings =>
+            if (env.IsDevelopment())
             {
-                settings.GeneratorSettings.DefaultPropertyNameHandling =
-                    PropertyNameHandling.CamelCase;
-            });
-
-            // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint.
-            //if (env.IsDevelopment())
-            //{
-            //    app.UseSwaggerUI(c =>
-            //    {
-            //        c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-            //    });
-            //}
-
+                app.UseSwaggerUi(typeof(Startup).GetTypeInfo().Assembly, settings =>
+                {
+                    settings.GeneratorSettings.DefaultPropertyNameHandling = PropertyNameHandling.CamelCase;
+                });
+           }
             app.UseMvc();
-
-            //var result = string.IsNullOrEmpty(_testSecret) ? "Null" : "Not Null";
 
             app.Run(async (context) =>
             {
                 context.Response.StatusCode = 404;
                 await context.Response.WriteAsync("Page not found");
             });
-        }
-
-        private IServiceProvider ConfigureIoC(IServiceCollection services)
-        {
-             var container = StructureMapConfig.RegisterComponents();
-
-            container.Configure(config =>
-            {
-                //Populate the container using the service collection
-                //config.Scan(_ =>
-                //{
-                //    _.AssemblyContainingType(typeof(Startup));
-                //    _.AssembliesFromPath(".\\bin\\Debug\\netcoreapp2.0");
-                //    _.WithDefaultConventions();
-                //});
-                //config.For<ICountryService>().Use<CountryService>();
-                //config.For<ICountryRepository>().Use<CountryRepository>();
-                config.Populate(services);
-            });
-            return container.GetInstance<IServiceProvider>();
         }
     }
 }
