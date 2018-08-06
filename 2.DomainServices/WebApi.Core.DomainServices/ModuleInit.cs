@@ -14,8 +14,8 @@ namespace Net.Core.DomainServices
     {
         public void Initialize(IModuleRegistrar registrar)
         {
-            registrar.RegisterType(typeof(IUserStore<IdentityUserViewModel>), typeof(CustomUserStore));
-            registrar.RegisterType(typeof(IRoleStore<IdentityRoleViewModel>), typeof(CustomRoleStore));
+            //registrar.RegisterType(typeof(IUserStore<IdentityUserViewModel>), typeof(CustomUserStore));
+            //registrar.RegisterType(typeof(IRoleStore<IdentityRoleViewModel>), typeof(CustomRoleStore));
 
             //registrar.RegisterType<IEmailQueueService, EmailQueueService>();
             //registrar.RegisterType<IPdfQueueService, PdfQueueService>();

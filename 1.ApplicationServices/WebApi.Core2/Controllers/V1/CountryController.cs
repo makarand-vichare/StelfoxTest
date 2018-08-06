@@ -6,7 +6,9 @@ using Net.Core.IDomainServices.Services;
 
 namespace WebApi.Core2.Controllers.V1
 {
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Produces("application/json")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class CountryController : BaseController
     {
         private readonly ICountryService countryService;

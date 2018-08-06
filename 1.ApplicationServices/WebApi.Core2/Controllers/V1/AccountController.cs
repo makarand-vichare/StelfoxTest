@@ -1,15 +1,7 @@
-﻿using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Net.Core.IDomainServices.IdentityStores;
 using Net.Core.ViewModels.Identity.WebApi;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using WebApi.Core2.BindingModels;
 
@@ -19,9 +11,10 @@ namespace WebApi.Core2.Controllers.V1
     /// /reference http://bitoftech.net/2014/06/01/token-based-authentication-asp-net-web-api-2-owin-asp-net-identity/
     /// </summary>
 
-    [Authorize]
+    //[Authorize]
     [ApiVersion("1.0")]
-    [Route("api/[controller]")]
+    [Produces("application/json")]
+    [Route("api/{culture=en}/[controller]")]
     public class AccountController : BaseController
     {
         private UserManager<IdentityUserViewModel> userManager;
@@ -38,7 +31,7 @@ namespace WebApi.Core2.Controllers.V1
         }
 
         // POST api/Account/Register
-        [AllowAnonymous]
+        //[AllowAnonymous]
         [Route("Register")]
         [HttpPost]
         public async Task<IActionResult> Register(RegisterBindingModel model)

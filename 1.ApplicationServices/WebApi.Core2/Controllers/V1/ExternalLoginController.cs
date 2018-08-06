@@ -1,18 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Net.Core.ViewModels.Identity.WebApi;
+using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace WebApi.Core2.Controllers.V1
 {
+    [ApiVersion("1.0")]
     [Produces("application/json")]
-    [Route("api/ExternalLogin")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class ExternalLoginController : BaseController
     {
         private readonly UserManager<IdentityUserViewModel> _userManager;
@@ -26,9 +24,8 @@ namespace WebApi.Core2.Controllers.V1
             _signInManager = signInManager;
         }
 
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
+        [HttpGet, Route("Login"), AllowAnonymous]
+        //[ValidateAntiForgeryToken]
         public IActionResult Login(string provider, string returnUrl = null)
         {
             // Request a redirect to the external login provider.
@@ -37,8 +34,7 @@ namespace WebApi.Core2.Controllers.V1
             return Challenge(properties, provider);
         }
 
-        [HttpGet]
-        [AllowAnonymous]
+        [HttpGet, Route("LoginCallback"), AllowAnonymous]
         public async Task<IActionResult> LoginCallback(string returnUrl = null, string remoteError = null)
         {
             if (remoteError != null)

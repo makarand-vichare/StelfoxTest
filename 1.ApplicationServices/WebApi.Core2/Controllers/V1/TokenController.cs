@@ -10,7 +10,9 @@ using Net.Core.ViewModels.Identity.WebApi;
 namespace WebApi.Core2.Controllers.V1
 {
 
-    [Route("/token")]
+    [ApiVersion("1.0")]
+    [Produces("application/json")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class TokenController : Controller
     {
         private UserManager<IdentityUserViewModel> userManager;

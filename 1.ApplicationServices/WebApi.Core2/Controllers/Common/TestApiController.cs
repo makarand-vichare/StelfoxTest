@@ -6,7 +6,9 @@ using Net.Core.ViewModels.Identity.WebApi;
 
 namespace WebApi.Core2.Controllers
 {
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Produces("application/json")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class TestApiController : BaseController
     {
         // GET api/values

@@ -29,8 +29,15 @@ public static class ConfigureAuthenticationExtension
         //});
 
 
+        services.AddAuthentication(options => {
+            // This value must correspond to the instance of the cookie
+            // middleware used to create the authentication cookie.
+            options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        });
+
+
         // -----JWT Bearer Authentication -----
-        
+
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = "Jwt";
@@ -54,48 +61,48 @@ public static class ConfigureAuthenticationExtension
 
         /// ----- External logins - Facebook , Google  --------
 
-        services.AddAuthentication().AddFacebook(options =>
-        {
-            options.AppId = configuration["Authentication:Facebook:AppId"];
-            options.AppSecret = configuration["Authentication:Facebook:AppSecret"];
-        });
+        //services.AddAuthentication().AddFacebook(options =>
+        //{
+        //    options.AppId = configuration["Authentication:Facebook:AppId"];
+        //    options.AppSecret = configuration["Authentication:Facebook:AppSecret"];
+        //});
 
         services.AddAuthentication().AddGoogle(options =>
         {
             options.ClientId = configuration["Authentication:Google:ClientId"];
             options.ClientSecret = configuration["Authentication:Google:ClientSecret"];
-        });
+        }).AddCookie();
 
         ///---- OpenID Connect (OIDC) authentication ------
 
-        services.AddAuthentication(options =>
-        {
-            options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-        })
-        .AddCookie()
-        .AddOpenIdConnect(options =>
-        {
-            options.Authority = configuration["auth:oidc:authority"];
-            options.ClientId = configuration["auth:oidc:clientid"];
-        });
+        //services.AddAuthentication(options =>
+        //{
+        //    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        //    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+        //})
+        //.AddCookie()
+        //.AddOpenIdConnect(options =>
+        //{
+        //    options.Authority = configuration["auth:oidc:authority"];
+        //    options.ClientId = configuration["auth:oidc:clientid"];
+        //});
 
-        /// ----- Microsoft Account authentication -------
+        ///// ----- Microsoft Account authentication -------
 
-        services.AddAuthentication()
-        .AddMicrosoftAccount(options =>
-        {
-            options.ClientId = configuration["auth:microsoft:clientid"];
-            options.ClientSecret = configuration["auth:microsoft:clientsecret"];
-        });
+        //services.AddAuthentication()
+        //.AddMicrosoftAccount(options =>
+        //{
+        //    options.ClientId = configuration["auth:microsoft:clientid"];
+        //    options.ClientSecret = configuration["auth:microsoft:clientsecret"];
+        //});
 
-        ///----- Twitter authentication----------
+        /////----- Twitter authentication----------
 
-        services.AddAuthentication()
-        .AddTwitter(options =>
-        {
-            options.ConsumerKey = configuration["auth:twitter:consumerkey"];
-            options.ConsumerSecret = configuration["auth:twitter:consumersecret"];
-        });
+        //services.AddAuthentication()
+        //.AddTwitter(options =>
+        //{
+        //    options.ConsumerKey = configuration["auth:twitter:consumerkey"];
+        //    options.ConsumerSecret = configuration["auth:twitter:consumersecret"];
+        //});
     }
 }

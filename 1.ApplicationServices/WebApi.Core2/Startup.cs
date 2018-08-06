@@ -22,6 +22,10 @@ using System.IO;
 using NLog;
 using WebApi.Core2.Middleware;
 using WebApi.Core2.ContentNegotiationFormatters;
+using Net.Core.ViewModels.Identity.WebApi;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Routing;
+using Net.Core.DomainServices.IdentityStores;
 
 namespace WebApi.Core2
 {
@@ -51,6 +55,10 @@ namespace WebApi.Core2
         // This method gets called by the runtime. Use this method to add services to the container.
         public IServiceProvider ConfigureServices(IServiceCollection services)
         {
+            services.AddIdentity<IdentityUserViewModel, IdentityRoleViewModel>().AddDefaultTokenProviders();
+            services.AddTransient<IUserStore<IdentityUserViewModel>, CustomUserStore>();
+            services.AddTransient<IRoleStore<IdentityRoleViewModel>, CustomRoleStore>();
+
             services.AddMvc(config =>
             {
                 // Add XML Content Negotiation
@@ -72,7 +80,6 @@ namespace WebApi.Core2
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-
             app.ConfigureCustomExceptionMiddleware(env);
             app.UseCors("CorsPolicy");
             app.UseAuthentication();
@@ -87,8 +94,8 @@ namespace WebApi.Core2
                     settings.GeneratorSettings.DefaultPropertyNameHandling = PropertyNameHandling.CamelCase;
                 });
            }
-            app.UseMvc();
 
+            app.UseMvc();
             app.Run(async (context) =>
             {
                 context.Response.StatusCode = 404;

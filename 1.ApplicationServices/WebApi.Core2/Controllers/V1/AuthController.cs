@@ -13,8 +13,9 @@ using System.Threading.Tasks;
 
 namespace WebApi.Core2.Controllers.V1
 {
+    [ApiVersion("1.0")]
     [Produces("application/json")]
-    [Route("api/Auth")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class AuthController : BaseController
     {
         private SignInManager<IdentityUserViewModel> signInManager;

@@ -41,7 +41,7 @@ namespace WebApi.Core2.Middleware
             return context.Response.WriteAsync(new ErrorBindingModel()
             {
                 StatusCode = context.Response.StatusCode,
-                ErrorMessage = "Internal Server Error from the custom middleware."
+                ErrorMessage = exception.Message
             }.ToString());
 
         }

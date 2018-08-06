@@ -5,7 +5,9 @@ using System.IO;
 
 namespace WebApi.Core2.Controllers.V1
 {
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Produces("application/json")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class FileUploadController : BaseController
     {
         [HttpPost]

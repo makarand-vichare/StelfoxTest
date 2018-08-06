@@ -10,6 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="NLog.config" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="Controllers\V2\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
@@ -28,8 +32,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="nlog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\2.DomainServices\WebApi.Core.DomainServices\Net.Core.DomainServices.csproj" />
     <ProjectReference Include="..\..\2.DomainServices\WebApi.Core.IDomainServices\Net.Core.IDomainServices.csproj" />
     <ProjectReference Include="..\..\2.DomainServices\WebApi.Core.ViewModels\Net.Core.ViewModels.csproj" />
+    <ProjectReference Include="..\..\3.DataAccess\WebApi.Core.Repositories\Net.Core.Repositories.csproj" />
     <ProjectReference Include="..\..\4.InfraStructure\WebApi.Core.Infrastructure\Net.Core.Infrastructure.csproj" />
     <ProjectReference Include="..\..\5.Common\WebApi.Core.Common.MEF\Net.Core.MEF.csproj" />
   </ItemGroup>
