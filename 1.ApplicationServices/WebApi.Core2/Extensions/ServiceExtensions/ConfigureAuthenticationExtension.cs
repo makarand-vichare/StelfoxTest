@@ -29,13 +29,6 @@ public static class ConfigureAuthenticationExtension
         //});
 
 
-        services.AddAuthentication(options => {
-            // This value must correspond to the instance of the cookie
-            // middleware used to create the authentication cookie.
-            options.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        });
-
-
         // -----JWT Bearer Authentication -----
 
         services.AddAuthentication(options =>
@@ -71,7 +64,7 @@ public static class ConfigureAuthenticationExtension
         {
             options.ClientId = configuration["Authentication:Google:ClientId"];
             options.ClientSecret = configuration["Authentication:Google:ClientSecret"];
-        }).AddCookie();
+        });
 
         ///---- OpenID Connect (OIDC) authentication ------
 
