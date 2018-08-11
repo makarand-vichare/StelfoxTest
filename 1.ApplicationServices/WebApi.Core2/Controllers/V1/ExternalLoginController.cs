@@ -2,8 +2,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Net.Core.ViewModels.Identity.WebApi;
+using Newtonsoft.Json;
 using System;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace WebApi.Core2.Controllers.V1
@@ -26,17 +28,19 @@ namespace WebApi.Core2.Controllers.V1
 
         [HttpGet, Route("Login"), AllowAnonymous]
         //[ValidateAntiForgeryToken]
-        public IActionResult Login(string provider, string returnUrl = null)
+        public IActionResult Login(string provider,string clientId, string returnUrl = null)
         {
             // Request a redirect to the external login provider.
-            var redirectUrl = Url.Action(nameof(LoginCallback), "ExternalLogin", new { returnUrl });
+            var redirectUrl = Url.Action(nameof(LoginCallback), "ExternalLogin", new { returnUrl, clientId });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return Challenge(properties, provider);
         }
 
-        [HttpGet, Route("LoginCallback"), AllowAnonymous]
-        public async Task<IActionResult> LoginCallback(string returnUrl = null, string remoteError = null)
+        [HttpGet, Route("LoginCallback")]
+        public async Task<IActionResult> LoginCallback(string returnUrl = null, string clientId = null, string remoteError = null)
         {
+            var javascriptContent = new StringBuilder();
+            var returnPageName = "";
             if (remoteError != null)
             {
                 //ErrorMessage = $"Error from external provider: {remoteError}";
@@ -49,10 +53,32 @@ namespace WebApi.Core2.Controllers.V1
             }
 
             // Sign in the user with this external login provider if the user already has a login.
+            //TODO: extend this method for client id
             var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
 
+            if (result.Succeeded)
+            {
+                if (result.IsLockedOut || result.IsNotAllowed)
+                {
+                    returnPageName = "lockedOut/" + info.LoginProvider + "/" + result.IsLockedOut+ "/" + result.IsNotAllowed;
+                }
+            }
+            else
+            {
+                returnPageName = "registerExternal/" + info.LoginProvider;
+            }
+
             var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-            return Ok(new { result, email, info.LoginProvider, returnUrl });
+
+            javascriptContent.Append("<script type=\"text/javascript\">");
+            javascriptContent.Append("window.location=\""+ returnUrl + returnPageName + "/" + email + "\"");
+            //javascriptContent.Append("window.opener.externalProviderLogin(");
+            //javascriptContent.Append(JsonConvert.SerializeObject(new { result, email, info.LoginProvider, returnUrl }));
+            //javascriptContent.Append(");");
+            //javascriptContent.Append("window.close();");
+            javascriptContent.Append("</script>");
+
+            return Content(javascriptContent.ToString(), "text/html");
         }
 
         [HttpPost]
