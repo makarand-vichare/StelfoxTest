@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Net.Core.Utility;
 using Net.Core.ViewModels.Identity.WebApi;
 using Newtonsoft.Json;
 using System;
@@ -60,7 +61,6 @@ namespace WebApi.Core2.Controllers.V1
             //TODO: extend this method for client id
             var result = await signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
 
-            returnPageName = "home";
 
             if (result.Succeeded)
             {
@@ -68,27 +68,14 @@ namespace WebApi.Core2.Controllers.V1
                 {
                     returnPageName = "lockedOut/" + info.LoginProvider + "/" + result.IsLockedOut+ "/" + result.IsNotAllowed + "/" + email;
                 }
+
+                var user = await userManager.FindByEmailAsync(email);
+                returnPageName = (user.RoleName == UserRoles.Admin.ToString()) ? "adminlanding" : "userlanding";
+                returnPageName += "/" + true + "/" + user.UserName + "/" + user.RoleName + "/" + user.Id;
             }
             else
             {
-                
-                var user = new IdentityUserViewModel { UserName = "User"+ DateTime.Today.Ticks, Email = email };
-                var response = await userManager.CreateAsync(user);
-                if (response.Succeeded)
-                {
-                    response = await userManager.AddToRoleAsync(user, "User");
-                }
-
-                if (response.Succeeded)
-                {
-                    response = await userManager.AddLoginAsync(user, info);
-
-                    if (response.Succeeded)
-                    {
-                        await signInManager.SignInAsync(user, isPersistent: false);
-                    }
-                }
-                //////returnPageName = "registerExternal/" + info.LoginProvider + "/" + email;
+                returnPageName = "registerExternal/" + info.LoginProvider + "/" + info.ProviderKey + "/" + info.ProviderDisplayName + "/" + email;
             }
 
             javascriptContent.Append("<script type=\"text/javascript\">");
@@ -110,27 +97,33 @@ namespace WebApi.Core2.Controllers.V1
             if (ModelState.IsValid)
             {
                 // Get the information about the user from the external login provider
-                var info = await signInManager.GetExternalLoginInfoAsync();
-                if (info == null)
+                //var info = await signInManager.GetExternalLoginInfoAsync();
+                //if (info == null)
+                //{
+                //    throw new ApplicationException("Error loading external login information during confirmation.");
+                //}
+                var info = new UserLoginInfo(registration.LoginProvider, registration.ProviderKey, registration.ProviderDisplayName);
+                var user = new IdentityUserViewModel { UserName = AppMethods.GenerateUserName(registration.Email), Email = registration.Email };
+                var response = await userManager.CreateAsync(user);
+                if (response.Succeeded)
                 {
-                    throw new ApplicationException("Error loading external login information during confirmation.");
+                    response = await userManager.AddToRoleAsync(user, UserRoles.User.ToString());
                 }
-                var user = new IdentityUserViewModel { UserName = registration.Name, Email = registration.Email };
-                var result = await userManager.CreateAsync(user);
-                if (result.Succeeded)
+                if (response.Succeeded)
                 {
-                    result = await userManager.AddLoginAsync(user, info);
-                    if (result.Succeeded)
+                    user.RoleName = UserRoles.User.ToString();
+                    response = await userManager.AddLoginAsync(user, info);
+                    if (response.Succeeded)
                     {
                         await signInManager.SignInAsync(user, isPersistent: false);
                         //_logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
-                        return Ok(result);
+                        return Ok(new { UserInfo = user, IsAuth = true});
                     }
                 }
-                AddErrors(result);
+                AddErrors(response);
             }
 
-            return Ok(registration);
+            return BadRequest(ModelState);
         }
 
         private void AddErrors(IdentityResult result)

@@ -16,6 +16,7 @@ namespace Net.Core.ViewModels.Identity.WebApi
         public long CountryId { get; set; }
         public long CityId { get; set; }
         public string AboutInfo { get; set; }
+        public string RoleName { get; set; }
 
         //public virtual string PasswordHash { get; set; }
         //public virtual string SecurityStamp { get; set; }

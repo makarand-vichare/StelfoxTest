@@ -26,4 +26,11 @@
         NativeConfidential = 1,
         None = 3
     };
+
+    public enum UserRoles
+    {
+        User = 1,
+        Admin = 2,
+        Guest = 3
+    }
 }

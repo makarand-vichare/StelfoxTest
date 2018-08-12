@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using System.Xml.XPath;
 using System.Xml.Xsl;
@@ -230,6 +231,17 @@ namespace Net.Core.Utility
 
                 return Convert.ToBase64String(byteHash);
             }
+        }
+
+        public static string GenerateUserName(string email)
+        {
+            var partialEmail = email.Substring(0, email.IndexOf("@"));
+            return RemoveSpecialChars(partialEmail);
+        }
+
+        public static string RemoveSpecialChars(string input)
+        {
+            return Regex.Replace(input, @"[^0-9a-zA-Z\._]", string.Empty);
         }
     }
 }

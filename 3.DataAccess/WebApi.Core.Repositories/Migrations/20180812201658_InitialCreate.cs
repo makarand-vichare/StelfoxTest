@@ -1,10 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using System;
 
 namespace Net.Core.Repositories.Migrations
 {
-    public partial class initial : Migration
+    public partial class InitialCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -12,15 +12,16 @@ namespace Net.Core.Repositories.Migrations
                 name: "Clients",
                 columns: table => new
                 {
-                    ClientId = table.Column<string>(type: "nvarchar(200)", nullable: false),
-                    Active = table.Column<bool>(type: "bit", nullable: false),
-                    AllowedOrigin = table.Column<string>(type: "nvarchar(200)", nullable: false),
-                    ApplicationType = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    TimeStamp = table.Column<byte[]>(rowVersion: true, nullable: true),
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    ClientId = table.Column<string>(type: "nvarchar(200)", nullable: false),
+                    Secret = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(100)", nullable: false),
+                    ApplicationType = table.Column<string>(type: "nvarchar(50)", nullable: false),
+                    Active = table.Column<bool>(type: "bit", nullable: false),
                     RefreshTokenLifeTime = table.Column<int>(type: "int", nullable: false),
-                    Secret = table.Column<string>(type: "nvarchar(MAX)", nullable: false)
+                    AllowedOrigin = table.Column<string>(type: "nvarchar(200)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -31,6 +32,7 @@ namespace Net.Core.Repositories.Migrations
                 name: "Countries",
                 columns: table => new
                 {
+                    TimeStamp = table.Column<byte[]>(rowVersion: true, nullable: true),
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     CountryCode = table.Column<string>(type: "nvarchar(256)", nullable: false),
@@ -46,18 +48,19 @@ namespace Net.Core.Repositories.Migrations
                 name: "EmailQueues",
                 columns: table => new
                 {
+                    TimeStamp = table.Column<byte[]>(rowVersion: true, nullable: true),
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    AttachedFiles = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
-                    EmailSubject = table.Column<string>(type: "nvarchar(500)", nullable: false),
-                    ErrorMessage = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
+                    UpdatedOn = table.Column<DateTime>(nullable: false),
+                    UpdatedBy = table.Column<long>(nullable: false),
+                    IsActive = table.Column<bool>(nullable: false),
                     FromEmailId = table.Column<string>(type: "nvarchar(500)", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    IsSucceedEmailSent = table.Column<bool>(type: "bit", nullable: false),
-                    MessageBody = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
                     ToEmailId = table.Column<string>(type: "nvarchar(500)", nullable: false),
-                    UpdatedBy = table.Column<long>(type: "bigint", nullable: false),
-                    UpdatedOn = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    EmailSubject = table.Column<string>(type: "nvarchar(500)", nullable: false),
+                    MessageBody = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
+                    AttachedFiles = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
+                    IsSucceedEmailSent = table.Column<bool>(type: "bit", nullable: false),
+                    ErrorMessage = table.Column<string>(type: "nvarchar(MAX)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -68,6 +71,7 @@ namespace Net.Core.Repositories.Migrations
                 name: "KeyGroups",
                 columns: table => new
                 {
+                    TimeStamp = table.Column<byte[]>(rowVersion: true, nullable: true),
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     KeyGroup = table.Column<string>(type: "nvarchar(256)", nullable: false),
@@ -82,12 +86,13 @@ namespace Net.Core.Repositories.Migrations
                 name: "LocalizationKeys",
                 columns: table => new
                 {
+                    TimeStamp = table.Column<byte[]>(rowVersion: true, nullable: true),
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    LocalizationKey = table.Column<string>(type: "nvarchar(256)", nullable: false),
                     EnglishValue = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
                     IrishValue = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    LocalizationKey = table.Column<string>(type: "nvarchar(256)", nullable: false)
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -98,13 +103,14 @@ namespace Net.Core.Repositories.Migrations
                 name: "PdfQueues",
                 columns: table => new
                 {
+                    TimeStamp = table.Column<byte[]>(rowVersion: true, nullable: true),
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     CriminalId = table.Column<long>(type: "bigint", nullable: false),
-                    ErrorMessage = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
                     GeneratedHtml = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
+                    ReGenerationRequired = table.Column<bool>(type: "bit", nullable: false),
                     IsPdfGenerationSucceed = table.Column<bool>(type: "bit", nullable: false),
-                    ReGenerationRequired = table.Column<bool>(type: "bit", nullable: false)
+                    ErrorMessage = table.Column<string>(type: "nvarchar(MAX)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -115,11 +121,12 @@ namespace Net.Core.Repositories.Migrations
                 name: "RequestQueues",
                 columns: table => new
                 {
+                    TimeStamp = table.Column<byte[]>(rowVersion: true, nullable: true),
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    ErrorMessage = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
+                    SearchParameters = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
                     IsRequestSucceed = table.Column<bool>(type: "bit", nullable: false),
-                    SearchParameters = table.Column<string>(type: "nvarchar(MAX)", nullable: false)
+                    ErrorMessage = table.Column<string>(type: "nvarchar(MAX)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -130,6 +137,7 @@ namespace Net.Core.Repositories.Migrations
                 name: "Roles",
                 columns: table => new
                 {
+                    TimeStamp = table.Column<byte[]>(rowVersion: true, nullable: true),
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false)
@@ -143,17 +151,18 @@ namespace Net.Core.Repositories.Migrations
                 name: "Users",
                 columns: table => new
                 {
+                    TimeStamp = table.Column<byte[]>(rowVersion: true, nullable: true),
                     UserId = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    AboutInfo = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CityId = table.Column<long>(type: "bigint", nullable: false),
-                    CountryId = table.Column<long>(type: "bigint", nullable: false),
-                    BirthDate = table.Column<DateTime>(type: "date", nullable: false),
+                    UserName = table.Column<string>(type: "nvarchar(256)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(256)", nullable: true),
                     Gender = table.Column<int>(type: "int", nullable: false),
+                    BirthDate = table.Column<DateTime>(type: "date", nullable: false),
+                    CountryId = table.Column<long>(type: "bigint", nullable: false),
+                    CityId = table.Column<long>(type: "bigint", nullable: false),
+                    AboutInfo = table.Column<string>(nullable: true),
                     PasswordHash = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
-                    SecurityStamp = table.Column<string>(type: "nvarchar(MAX)", nullable: true),
-                    UserName = table.Column<string>(type: "nvarchar(256)", nullable: false)
+                    SecurityStamp = table.Column<string>(type: "nvarchar(MAX)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -164,14 +173,15 @@ namespace Net.Core.Repositories.Migrations
                 name: "RefreshTokens",
                 columns: table => new
                 {
+                    TimeStamp = table.Column<byte[]>(rowVersion: true, nullable: true),
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    ClientId = table.Column<string>(type: "nvarchar(200)", maxLength: 50, nullable: false),
-                    ExpiresUtc = table.Column<DateTime>(type: "DateTime", nullable: false),
-                    IssuedUtc = table.Column<DateTime>(type: "DateTime", nullable: false),
-                    ProtectedTicket = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
+                    TokenId = table.Column<string>(type: "nvarchar(MAX)", nullable: false),
                     Subject = table.Column<string>(type: "nvarchar(100)", maxLength: 50, nullable: false),
-                    TokenId = table.Column<string>(type: "nvarchar(MAX)", nullable: false)
+                    ClientId = table.Column<string>(type: "nvarchar(200)", maxLength: 50, nullable: false),
+                    IssuedUtc = table.Column<DateTime>(type: "DateTime", nullable: false),
+                    ExpiresUtc = table.Column<DateTime>(type: "DateTime", nullable: false),
+                    ProtectedTicket = table.Column<string>(type: "nvarchar(MAX)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -188,10 +198,11 @@ namespace Net.Core.Repositories.Migrations
                 name: "Cities",
                 columns: table => new
                 {
+                    TimeStamp = table.Column<byte[]>(rowVersion: true, nullable: true),
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    CountryId = table.Column<long>(nullable: false),
                     CityName = table.Column<string>(type: "nvarchar(200)", nullable: false),
-                    CountryId = table.Column<long>(type: "bigint", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -209,11 +220,12 @@ namespace Net.Core.Repositories.Migrations
                 name: "Claims",
                 columns: table => new
                 {
+                    TimeStamp = table.Column<byte[]>(rowVersion: true, nullable: true),
                     ClaimId = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    UserId = table.Column<long>(type: "bigint", nullable: false),
                     ClaimType = table.Column<string>(type: "nvarchar(500)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(500)", nullable: true),
-                    UserId = table.Column<long>(type: "bigint", nullable: false)
+                    ClaimValue = table.Column<string>(type: "nvarchar(500)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -230,10 +242,12 @@ namespace Net.Core.Repositories.Migrations
                 name: "ExternalLogins",
                 columns: table => new
                 {
+                    TimeStamp = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     LoginProvider = table.Column<string>(type: "nvarchar(128)", nullable: false),
                     ProviderKey = table.Column<string>(type: "nvarchar(128)", nullable: false),
-                    UserId = table.Column<long>(type: "bigint", nullable: false),
-                    Id = table.Column<long>(type: "bigint", nullable: false)
+                    UserId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -250,6 +264,9 @@ namespace Net.Core.Repositories.Migrations
                 name: "UserRoles",
                 columns: table => new
                 {
+                    TimeStamp = table.Column<byte[]>(rowVersion: true, nullable: true),
+                    Id = table.Column<long>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     RoleId = table.Column<long>(type: "bigint", nullable: false),
                     UserId = table.Column<long>(type: "bigint", nullable: false)
                 },

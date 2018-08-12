@@ -2,7 +2,7 @@
 
 namespace Net.Core.EntityModels.Identity
 {
-    public class UserRole : BaseEntity
+    public class UserRole : IdentityColumnEntity
     {
         #region Fields
         #endregion
