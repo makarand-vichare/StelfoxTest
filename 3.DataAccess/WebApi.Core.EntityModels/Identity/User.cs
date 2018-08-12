@@ -42,7 +42,7 @@ namespace Net.Core.EntityModels.Identity
             set { _externalLogins = value; }
         }
 
-        public ICollection<UserRole> UserRoles { get; set; }
+        public virtual ICollection<UserRole> UserRoles { get; set; }
 
         #endregion
     }

@@ -8,6 +8,7 @@ using Net.Core.EntityModels.Identity;
 using Net.Core.IDomainServices.AutoMapper;
 using Net.Core.IRepositories.Core;
 using Net.Core.ViewModels.Identity.WebApi;
+using AutoMapper;
 
 namespace Net.Core.DomainServices.IdentityStores
 {
@@ -19,24 +20,29 @@ namespace Net.Core.DomainServices.IdentityStores
         IUserStore<IdentityUserViewModel>, IDisposable 
     {
         private readonly IUnitOfWork unitOfWork;
+        private readonly IMapper mapper;
 
-        public CustomUserStore(IUnitOfWork unitOfWork)
+        public CustomUserStore(IUnitOfWork _unitOfWork, IMapper _mapper)
         {
-            this.unitOfWork = unitOfWork;
+            unitOfWork = _unitOfWork;
+            mapper = _mapper;
         }
 
         #region IUserStore<IdentityUserViewModel, long> Members
 
         public Task<string> GetUserIdAsync(IdentityUserViewModel viewModel, CancellationToken cancellationToken)
         {
-            var model = unitOfWork.UserRepository.FindByUserName(viewModel.UserName);
-            return Task.FromResult<string>(model.Id.ToString());
+            //var model = unitOfWork.UserRepository.FindById(viewModel.Id);
+            //var userId = (model != null) ? model.Id.ToString() : string.Empty;
+
+            return Task.FromResult<string>(viewModel.Id.ToString());
         }
 
         public Task<string> GetUserNameAsync(IdentityUserViewModel viewModel, CancellationToken cancellationToken)
         {
-            var model = unitOfWork.UserRepository.FindById(viewModel.Id);
-            return Task.FromResult<string>(model.UserName);
+            //var model = unitOfWork.UserRepository.FindByUserName(viewModel.UserName);
+            //var userName = (model != null) ? model.UserName : string.Empty;
+            return Task.FromResult<string>(viewModel.UserName);
         }
 
         public Task SetUserNameAsync(IdentityUserViewModel viewModel, string userName, CancellationToken cancellationToken)
@@ -63,12 +69,12 @@ namespace Net.Core.DomainServices.IdentityStores
             if (viewModel == null)
                 throw new ArgumentException("user");
 
-            var model = unitOfWork.UserRepository.FindById(viewModel.Id);
-            if (model == null)
-                throw new ArgumentException("IdentityUserViewModel does not correspond to a User entity.", "user");
-            model.UserName = normalizedName;
-            unitOfWork.UserRepository.Update(model);
-            return unitOfWork.CommitAsync();
+            //var model = unitOfWork.UserRepository.FindById(viewModel.Id);
+            //if (model == null)
+            //    throw new ArgumentException("IdentityUserViewModel does not correspond to a User entity.", "user");
+            viewModel.UserName = normalizedName;
+            //unitOfWork.UserRepository.Update(model);
+            return Task.FromResult(0);
         }
 
         public Task<IdentityResult> CreateAsync(IdentityUserViewModel viewModel, CancellationToken cancellationToken)
@@ -79,6 +85,10 @@ namespace Net.Core.DomainServices.IdentityStores
             var model = GetUserModel(viewModel);
             unitOfWork.UserRepository.Add(model);
             var result = unitOfWork.CommitAsync().Result;
+            if(result > 0)
+            {
+                viewModel.Id = model.Id;
+            }
             return result > 0 ? Task.FromResult(IdentityResult.Success) : Task.FromResult(new IdentityResult { });
         }
 
@@ -225,7 +235,7 @@ namespace Net.Core.DomainServices.IdentityStores
             if (ids == null)
                 throw new ArgumentException("IdentityUserViewModel does not correspond to a User entity.", "user");
 
-            var users = unitOfWork.UserRepository.GetMany(o => ids.Contains(o.Id)).ToViewModel<User,IdentityUserViewModel>().ToList();
+            var users = unitOfWork.UserRepository.GetMany(o => ids.Contains(o.Id)).ToViewModel<User,IdentityUserViewModel>(mapper).ToList();
             return Task.FromResult<IList<IdentityUserViewModel>>(users);
         }
 
@@ -315,8 +325,8 @@ namespace Net.Core.DomainServices.IdentityStores
             if (roleEntityModel == null)
                 throw new ArgumentException("roleName does not correspond to a Role entity.", "roleName");
 
-            model.UserRoles.Add(new UserRole { UserId = viewModel.Id, RoleId = roleEntityModel.Id });
-            unitOfWork.UserRepository.Update(model);
+            var userRole = new UserRole { UserId = viewModel.Id, RoleId = roleEntityModel.Id };
+            unitOfWork.UserRoleRepository.Add(userRole);
 
             return unitOfWork.CommitAsync();
         }
@@ -365,10 +375,11 @@ namespace Net.Core.DomainServices.IdentityStores
             if (model == null)
                 throw new ArgumentException("IdentityUserViewModel does not correspond to a User entity.", "user");
 
-            var ids = model.UserRoles.Select(o => o.RoleId);
-            var list = unitOfWork.RoleRepository.GetMany(o => ids.Contains(o.Id));
+            var list = unitOfWork.RoleRepository.GetMany(o => o.Name == roleName).Select(s=>s.Id).ToList();
 
-            return Task.FromResult<bool>(list.Any(x => x.Name == roleName));
+            var roleExists = unitOfWork.UserRoleRepository.Contains(o => o.UserId == viewModel.Id && list.Contains(o.RoleId));
+
+            return Task.FromResult<bool>(roleExists);
         }
 
         public Task<IList<IdentityUserViewModel>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
@@ -378,7 +389,7 @@ namespace Net.Core.DomainServices.IdentityStores
                 throw new ArgumentException("IdentityRoleViewModel does not correspond to a Role entity.", "roleName");
 
             var ids = model.UserRoles.Select(o => o.UserId);
-            IList<IdentityUserViewModel> list = unitOfWork.UserRepository.GetMany(o => ids.Contains(o.Id)).ToViewModel<User,IdentityUserViewModel>().ToList();
+            IList<IdentityUserViewModel> list = unitOfWork.UserRepository.GetMany(o => ids.Contains(o.Id)).ToViewModel<User,IdentityUserViewModel>(mapper).ToList();
             return Task.FromResult(list);
         }
 
@@ -429,7 +440,7 @@ namespace Net.Core.DomainServices.IdentityStores
             if (viewModel == null)
                 return null;
 
-            var model = viewModel.ToEntityModel<User, IdentityUserViewModel>();
+            var model = viewModel.ToEntityModel<User, IdentityUserViewModel>(mapper);
             return model;
         }
 
@@ -438,7 +449,7 @@ namespace Net.Core.DomainServices.IdentityStores
             if (model == null)
                 return null;
 
-            var viewModel = model.ToViewModel<User, IdentityUserViewModel>();
+            var viewModel = model.ToViewModel<User, IdentityUserViewModel>(mapper);
 
             return viewModel;
         }

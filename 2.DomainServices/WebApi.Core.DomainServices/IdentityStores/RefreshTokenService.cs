@@ -19,7 +19,7 @@ namespace Net.Core.DomainServices.IdentityStores
                 var result = await RemoveRefreshToken(existingToken.TokenId);
             }
 
-            var tokenEntity = token.ToEntityModel<RefreshToken, RefreshTokenViewModel>();
+            var tokenEntity = token.ToEntityModel<RefreshToken, RefreshTokenViewModel>(Mapper);
             UnitOfWork.RefreshTokenRepository.Add(tokenEntity);
             return await UnitOfWork.CommitAsync() > 0;
         }
@@ -38,7 +38,7 @@ namespace Net.Core.DomainServices.IdentityStores
 
         public async Task<bool> RemoveRefreshToken(RefreshTokenViewModel refreshToken)
         {
-            var tokenEntity = refreshToken.ToEntityModel<RefreshToken, RefreshTokenViewModel>();
+            var tokenEntity = refreshToken.ToEntityModel<RefreshToken, RefreshTokenViewModel>(Mapper);
             UnitOfWork.RefreshTokenRepository.Delete(tokenEntity);
             return await UnitOfWork.CommitAsync() > 0;
         }
@@ -46,7 +46,7 @@ namespace Net.Core.DomainServices.IdentityStores
         public async Task<RefreshTokenViewModel> FindRefreshToken(string refreshTokenId)
         {
             var refreshToken = await UnitOfWork.RefreshTokenRepository.FindByTokenIdAsync(refreshTokenId);
-            var tokenViewModel = refreshToken.ToViewModel<RefreshToken, RefreshTokenViewModel>();
+            var tokenViewModel = refreshToken.ToViewModel<RefreshToken, RefreshTokenViewModel>(Mapper);
             return tokenViewModel;
         }
 
@@ -54,7 +54,7 @@ namespace Net.Core.DomainServices.IdentityStores
         {
             return UnitOfWork.RefreshTokenRepository
                 .GetAll()
-                .ToViewModel<RefreshToken, RefreshTokenViewModel>()
+                .ToViewModel<RefreshToken, RefreshTokenViewModel>(Mapper)
                 .ToList();
         }
     }

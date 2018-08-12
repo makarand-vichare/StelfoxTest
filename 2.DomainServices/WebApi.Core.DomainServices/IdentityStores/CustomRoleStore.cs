@@ -7,16 +7,19 @@ using Net.Core.EntityModels.Identity;
 using Net.Core.IDomainServices.AutoMapper;
 using Net.Core.IRepositories.Core;
 using Net.Core.ViewModels.Identity.WebApi;
+using AutoMapper;
 
 namespace Net.Core.DomainServices.IdentityStores
 {
     public class CustomRoleStore :  IRoleStore<IdentityRoleViewModel>, IQueryableRoleStore<IdentityRoleViewModel>, IDisposable
     {
         private readonly IUnitOfWork unitOfWork;
+        private readonly IMapper mapper;
 
-        public CustomRoleStore(IUnitOfWork unitOfWork)
+        public CustomRoleStore(IUnitOfWork _unitOfWork, IMapper _mapper)
         {
-            this.unitOfWork = unitOfWork;
+            unitOfWork = _unitOfWork;
+            mapper = _mapper;
         }
 
         public IQueryable<IdentityRoleViewModel> Roles
@@ -53,7 +56,7 @@ namespace Net.Core.DomainServices.IdentityStores
             if (model == null)
                 throw new ArgumentException("IdentityRoleViewModel does not correspond to a Role entity.", "role");
 
-            model = viewModel.ToEntityModel<Role, IdentityRoleViewModel>();
+            model = viewModel.ToEntityModel<Role, IdentityRoleViewModel>(mapper);
 
             unitOfWork.RoleRepository.Update(model);
             var result = unitOfWork.CommitAsync().Result;
@@ -84,7 +87,7 @@ namespace Net.Core.DomainServices.IdentityStores
         public Task<string> GetRoleNameAsync(IdentityRoleViewModel viewModel, CancellationToken cancellationToken)
         {
             var model = unitOfWork.RoleRepository.FindByName(viewModel.Name);
-          //  var viewModel = model.ToViewModel<Role, IdentityRoleViewModel>();
+            //  var viewModel = model.ToViewModel<Role, IdentityRoleViewModel>(mapper);
             return Task.FromResult<string>(model.Name);
         }
 
@@ -98,7 +101,7 @@ namespace Net.Core.DomainServices.IdentityStores
             if (model == null)
                 throw new ArgumentException("IdentityRoleViewModel does not correspond to a Role entity.", "role");
 
-            model = viewModel.ToEntityModel<Role, IdentityRoleViewModel>();
+            model = viewModel.ToEntityModel<Role, IdentityRoleViewModel>(mapper);
 
             unitOfWork.RoleRepository.Update(model);
             return unitOfWork.CommitAsync();
@@ -107,7 +110,7 @@ namespace Net.Core.DomainServices.IdentityStores
         public Task<string> GetNormalizedRoleNameAsync(IdentityRoleViewModel viewModel, CancellationToken cancellationToken)
         {
             var model = unitOfWork.RoleRepository.FindById(viewModel.Id);
-            //  var viewModel = model.ToViewModel<Role, IdentityRoleViewModel>();
+            //  var viewModel = model.ToViewModel<Role, IdentityRoleViewModel>(mapper);
             return Task.FromResult<string>(model.Name);
         }
 
@@ -121,7 +124,7 @@ namespace Net.Core.DomainServices.IdentityStores
             if (model == null)
                 throw new ArgumentException("IdentityRoleViewModel does not correspond to a Role entity.", "role");
 
-            model = viewModel.ToEntityModel<Role, IdentityRoleViewModel>();
+            model = viewModel.ToEntityModel<Role, IdentityRoleViewModel>(mapper);
 
             unitOfWork.RoleRepository.Update(model);
             return unitOfWork.CommitAsync();
@@ -131,7 +134,7 @@ namespace Net.Core.DomainServices.IdentityStores
         {
             var model = unitOfWork.RoleRepository.FindById(roleId);
 
-            var viewModel = model.ToViewModel<Role, IdentityRoleViewModel>();
+            var viewModel = model.ToViewModel<Role, IdentityRoleViewModel>(mapper);
 
             return Task.FromResult<IdentityRoleViewModel>(viewModel);
         }
@@ -139,7 +142,7 @@ namespace Net.Core.DomainServices.IdentityStores
         public Task<IdentityRoleViewModel> FindByNameAsync(string normalizedRoleName, CancellationToken cancellationToken)
         {
             var model = unitOfWork.RoleRepository.FindByName(normalizedRoleName);
-            var viewModel = model.ToViewModel<Role, IdentityRoleViewModel>();
+            var viewModel = model.ToViewModel<Role, IdentityRoleViewModel>(mapper);
 
             return Task.FromResult<IdentityRoleViewModel>(viewModel);
         }
@@ -151,7 +154,7 @@ namespace Net.Core.DomainServices.IdentityStores
             if (viewModel == null)
                 return null;
 
-            var model = viewModel.ToEntityModel<Role, IdentityRoleViewModel>();
+            var model = viewModel.ToEntityModel<Role, IdentityRoleViewModel>(mapper);
             return model;
         }
 
@@ -160,7 +163,7 @@ namespace Net.Core.DomainServices.IdentityStores
             if (model == null)
                 return null;
 
-            return model.ToViewModel<Role, IdentityRoleViewModel>();
+            return model.ToViewModel<Role, IdentityRoleViewModel>(mapper);
         }
 
         #endregion

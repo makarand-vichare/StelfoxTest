@@ -49,7 +49,7 @@ namespace Net.Core.DomainServices
 
             if (entityList != null && entityList.Count > 0)
             {
-                result = entityList.ToViewModel<EmailQueue, EmailQueueViewModel>().ToList();
+                result = entityList.ToViewModel<EmailQueue, EmailQueueViewModel>(Mapper).ToList();
             }
 
             return result;

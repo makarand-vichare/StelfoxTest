@@ -20,7 +20,7 @@ namespace Net.Core.DomainServices
 
             if (entityList != null && entityList.Count > 0)
             {
-                result = entityList.ToViewModel<RequestQueue, RequestQueueViewModel>().ToList();
+                result = entityList.ToViewModel<RequestQueue, RequestQueueViewModel>(Mapper).ToList();
             }
 
             return result;

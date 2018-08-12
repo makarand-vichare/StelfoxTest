@@ -1,13 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
     <UserSecretsId>194337bc-e0e1-41ee-96fc-7cf493579650</UserSecretsId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <OutputPath>bin\Debug\</OutputPath>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Extensions\ServiceExtensions\ConfigureAutomapperExtension.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <Content Remove="NLog.config" />
@@ -19,11 +23,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.8" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="5.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="2.3.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.0.3" />
-    <PackageReference Include="NLog" Version="4.5.7" />
-    <PackageReference Include="NSwag.AspNetCore" Version="11.18.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" />
+    <PackageReference Include="NLog" Version="4.5.8" />
+    <PackageReference Include="NSwag.AspNetCore" Version="11.18.5" />
     <PackageReference Include="StructureMap.Microsoft.DependencyInjection" Version="1.4.0" />
   </ItemGroup>
 

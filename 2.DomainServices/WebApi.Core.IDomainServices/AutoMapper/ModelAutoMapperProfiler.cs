@@ -17,12 +17,12 @@ namespace Net.Core.IDomainServices.AutoMapper
            CreateMap<AuditableEntity, AuditableViewModel>().ReverseMap();
            CreateMap<IdentityColumnEntity, IdentityColumnViewModel>().ReverseMap();
 
-           CreateMap<User, IdentityUserViewModel>()
-                            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
-
-           CreateMap<IdentityUserViewModel, User>()
-                            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));
-
+            CreateMap<User, IdentityUserViewModel>()
+                             //.ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                             .ReverseMap()
+                             //.ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
+                             .ForMember(dest => dest.Claims, opt => opt.Ignore())
+                             .ForMember(dest => dest.UserRoles, opt => opt.Ignore());
 
            CreateMap<Role, IdentityRoleViewModel>()
                             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id));

@@ -22,7 +22,7 @@ namespace Net.Core.DomainServices
 
             if (entityList != null && entityList.Count > 0)
             {
-                result = entityList.ToViewModel<PdfQueue, PdfQueueViewModel>().ToList();
+                result = entityList.ToViewModel<PdfQueue, PdfQueueViewModel>(Mapper).ToList();
             }
 
             return result;

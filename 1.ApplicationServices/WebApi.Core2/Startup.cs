@@ -1,31 +1,24 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Text;
-using NSwag.AspNetCore;
-using System.Reflection;
-using NJsonSchema;
-using Microsoft.AspNetCore.Http;
-using StructureMap;
-using WebApi.Core2.StructureMap;
-using Microsoft.AspNetCore.Diagnostics;
-using WebApi.Core2.BindingModels;
-using WebApi.Core2.ActionFilters;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.HttpOverrides;
-using System.IO;
-using NLog;
-using WebApi.Core2.Middleware;
-using WebApi.Core2.ContentNegotiationFormatters;
-using Net.Core.ViewModels.Identity.WebApi;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Routing;
 using Net.Core.DomainServices.IdentityStores;
+using Net.Core.IDomainServices.AutoMapper;
+using Net.Core.ViewModels.Identity.WebApi;
+using NJsonSchema;
+using NLog;
+using NSwag.AspNetCore;
+using System;
+using System.IO;
+using System.Reflection;
+using WebApi.Core2.ActionFilters;
+using WebApi.Core2.ContentNegotiationFormatters;
 
 namespace WebApi.Core2
 {
@@ -67,6 +60,9 @@ namespace WebApi.Core2
                 config.OutputFormatters.Add(new XmlSerializerOutputFormatter());
                 config.OutputFormatters.Add(new CsvOutputFormatter());
             });
+
+            services.AddAutoMapper(Assembly.GetAssembly(typeof(ModelAutoMapperProfiler)));
+
             services.AddApiVersioning(o => o.ApiVersionReader = new HeaderApiVersionReader("api-version"));
             services.ConfigureCors();
             services.ConfigureLoggerService();
@@ -74,6 +70,7 @@ namespace WebApi.Core2
             services.ConfigureAuthentication(Configuration);
             services.AddSwagger();
             services.AddScoped<ModelValidationAttribute>();
+
             return services.ConfigureIoc();
         }
 

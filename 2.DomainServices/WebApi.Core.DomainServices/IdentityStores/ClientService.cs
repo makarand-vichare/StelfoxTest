@@ -12,14 +12,14 @@ namespace Net.Core.DomainServices.IdentityStores
         public async Task<RefreshTokenViewModel> FindRefreshToken(string refreshTokenId)
         {
             var refreshToken = await UnitOfWork.RefreshTokenRepository.FindByTokenIdAsync(refreshTokenId);
-            var tokenViewModel = refreshToken.ToViewModel<RefreshToken, RefreshTokenViewModel>();
+            var tokenViewModel = refreshToken.ToViewModel<RefreshToken, RefreshTokenViewModel>(Mapper);
             return tokenViewModel;
         }
 
         public ClientViewModel FindClient(string clientId)
         {
             var clientEntity = UnitOfWork.ClientRepository.FindByClientId(clientId);
-            var clientViewModel = clientEntity.ToViewModel<Client, ClientViewModel>();
+            var clientViewModel = clientEntity.ToViewModel<Client, ClientViewModel>(Mapper);
 
             return clientViewModel;
         }

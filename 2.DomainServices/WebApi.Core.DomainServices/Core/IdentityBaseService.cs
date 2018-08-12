@@ -25,7 +25,7 @@ namespace Net.Core.DomainServices.Core
             try
             {
                 var models = UnitOfWork.SetDbContext(IdentityBaseRepository).GetAll();
-                response.ViewModels = models.ToViewModel<T, VM>().ToList();
+                response.ViewModels = models.ToViewModel<T, VM>(Mapper).ToList();
             }
             catch (Exception ex)
             {
@@ -41,7 +41,7 @@ namespace Net.Core.DomainServices.Core
             try
             {
                 var model = UnitOfWork.SetDbContext(IdentityBaseRepository).FindById(id);
-                response.ViewModel = model.ToViewModel<T, VM>();
+                response.ViewModel = model.ToViewModel<T, VM>(Mapper);
             }
             catch (Exception ex)
             {
@@ -56,7 +56,7 @@ namespace Net.Core.DomainServices.Core
             var response = new ResponseResult<VM>() { IsSucceed = true, Message = AppMessages.Saved_Details_Successfully };
             try
             {
-                T model = viewModel.ToEntityModel<T,VM>();
+                T model = viewModel.ToEntityModel<T,VM>(Mapper);
             
                 if (viewModel.Id == 0)
                 {
@@ -68,7 +68,7 @@ namespace Net.Core.DomainServices.Core
                 }
 
                 UnitOfWork.Commit();
-                response.ViewModel = model.ToViewModel<T, VM>();
+                response.ViewModel = model.ToViewModel<T, VM>(Mapper);
             }
             catch (Exception ex)
             {

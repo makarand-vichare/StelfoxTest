@@ -33,7 +33,7 @@ namespace WebApi.Core2.StructureMap
             //container.RegisterType<IUserDomain, UserDomain>();
 
             //Module initialization thru MEF
-            StructureMapModuleLoader.LoadContainer(container, @".\bin\Debug\netcoreapp2.0", "Net.Core.*.dll");
+            StructureMapModuleLoader.LoadContainer(container, @".\bin\Debug\netcoreapp2.1", "Net.Core.*.dll");
         }
 
         public static IContainer RegisterComponents(IContainer container)

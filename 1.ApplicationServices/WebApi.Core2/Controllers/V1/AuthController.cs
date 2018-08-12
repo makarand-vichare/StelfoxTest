@@ -68,5 +68,14 @@ namespace WebApi.Core2.Controllers.V1
             }
         }
 
+        [HttpPost]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await signInManager.SignOutAsync();
+            //_logger.LogInformation("User logged out.");
+            return Ok("Home");
+        }
+
     }
 }
