@@ -17,7 +17,8 @@ namespace Net.Core.DomainServices.IdentityStores
         IUserRoleStore<IdentityUserViewModel>, 
         IUserPasswordStore<IdentityUserViewModel>, 
         IUserSecurityStampStore<IdentityUserViewModel>, 
-        IUserStore<IdentityUserViewModel>, IDisposable 
+        IUserStore<IdentityUserViewModel>,
+        IUserEmailStore<IdentityUserViewModel>, IDisposable
     {
         private readonly IUnitOfWork unitOfWork;
         private readonly IMapper mapper;
@@ -302,7 +303,10 @@ namespace Net.Core.DomainServices.IdentityStores
 
             var externalLoginEntityModel = unitOfWork.ExternalLoginRepository.GetByProviderAndKey(loginProvider, providerKey);
             if (externalLoginEntityModel != null)
-                identityUser = GetIdentityUserViewModel(externalLoginEntityModel.User);
+            {
+                var user = unitOfWork.UserRepository.FindById(externalLoginEntityModel.UserId);
+                identityUser = GetIdentityUserViewModel(user);
+            }
 
             return Task.FromResult<IdentityUserViewModel>(identityUser);
         }
@@ -355,11 +359,11 @@ namespace Net.Core.DomainServices.IdentityStores
             if (viewModel == null)
                 throw new ArgumentNullException("user");
 
-            var model = unitOfWork.UserRepository.FindByEmail(viewModel.Email);
-            if (model == null)
+            var userEntity = unitOfWork.UserRepository.FindByEmail(viewModel.Email);
+            if (userEntity == null)
                 throw new ArgumentException("IdentityUserViewModel does not correspond to a User entity.", "user");
 
-            var ids = model.UserRoles.Select(o => o.RoleId);
+            var ids = unitOfWork.UserRoleRepository.GetMany(o => o.UserId == userEntity.Id).Select(o => o.RoleId).ToList();
             var list = unitOfWork.RoleRepository.GetMany(o => ids.Contains(o.Id));
             return Task.FromResult<IList<string>>(list.Select(x => x.Name).ToList());
         }
@@ -434,6 +438,64 @@ namespace Net.Core.DomainServices.IdentityStores
 
         #endregion
 
+        #region IUserEmailStore<IdentityUserViewModel, long> Members
+
+        public Task SetEmailAsync(IdentityUserViewModel viewModel, string email, CancellationToken cancellationToken)
+        {
+            if (viewModel == null)
+                throw new ArgumentException("user");
+
+            var model = unitOfWork.UserRepository.FindById(viewModel.Id);
+            if (model == null)
+                throw new ArgumentException("IdentityUserViewModel does not correspond to a User entity.", "user");
+            model.Email = email;
+            unitOfWork.UserRepository.Update(model);
+            return unitOfWork.CommitAsync();
+        }
+
+        public Task<string> GetEmailAsync(IdentityUserViewModel viewModel, CancellationToken cancellationToken)
+        {
+            return Task.FromResult<string>(viewModel.Email);
+        }
+
+        public Task<bool> GetEmailConfirmedAsync(IdentityUserViewModel viewModel, CancellationToken cancellationToken)
+        {
+            return Task.FromResult<bool>(true);
+        }
+
+        public Task SetEmailConfirmedAsync(IdentityUserViewModel viewModel, bool confirmed, CancellationToken cancellationToken)
+        {
+            if (viewModel == null)
+                throw new ArgumentException("user");
+
+            viewModel.EmailConfirmed = confirmed;
+            return Task.FromResult(0);
+        }
+
+        public Task<IdentityUserViewModel> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
+        {
+            var model = unitOfWork.UserRepository.FindByEmail(normalizedEmail);
+            return Task.FromResult<IdentityUserViewModel>(GetIdentityUserViewModel(model));
+
+        }
+
+        public Task<string> GetNormalizedEmailAsync(IdentityUserViewModel viewModel, CancellationToken cancellationToken)
+        {
+            var model = unitOfWork.UserRepository.FindByEmail(viewModel.Email);
+            return Task.FromResult<string>(model.Email);
+        }
+
+        public Task SetNormalizedEmailAsync(IdentityUserViewModel viewModel, string normalizedEmail, CancellationToken cancellationToken)
+        {
+            if (viewModel == null)
+                throw new ArgumentException("user");
+
+            viewModel.Email = normalizedEmail;
+            return Task.FromResult(0);
+        }
+
+        #endregion
+
         #region Private Methods
         private User GetUserModel(IdentityUserViewModel viewModel)
         {
@@ -451,9 +513,14 @@ namespace Net.Core.DomainServices.IdentityStores
 
             var viewModel = model.ToViewModel<User, IdentityUserViewModel>(mapper);
 
+            if (model.UserRoles != null)
+            {
+                viewModel.RoleName = model.UserRoles.FirstOrDefault().Role.Name;
+            }
             return viewModel;
         }
 
+        #endregion
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
 
@@ -488,7 +555,6 @@ namespace Net.Core.DomainServices.IdentityStores
             // GC.SuppressFinalize(this);
         }
 
-        #endregion
         #endregion
     }
 }

@@ -70,6 +70,9 @@ namespace WebApi.Core2.Controllers.V1
                 }
 
                 var user = await userManager.FindByEmailAsync(email);
+
+                await signInManager.SignInAsync(user, isPersistent: false);
+
                 returnPageName = (user.RoleName == UserRoles.Admin.ToString()) ? "adminlanding" : "userlanding";
                 returnPageName += "/" + true + "/" + user.UserName + "/" + user.RoleName + "/" + user.Id;
             }
