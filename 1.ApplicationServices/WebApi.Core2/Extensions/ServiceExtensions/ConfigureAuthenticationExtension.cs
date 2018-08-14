@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Net.Core.Utility;
 using System;
 using System.Text;
 
@@ -39,26 +40,27 @@ public static class ConfigureAuthenticationExtension
         {
             options.TokenValidationParameters = new TokenValidationParameters
             {
-                ValidateIssuer = true,
-                ValidateAudience = true,
                 ValidateLifetime = true,
+                ClockSkew = TimeSpan.FromMinutes(350), //5 minute tolerance for the expiration date
+ 
+                ValidateIssuer = true,
+                ValidIssuer = configuration.GetValue<string>(AppConstants.BaseUrlKey),
+
+                ValidateAudience = true,
+                ValidAudience = configuration.GetValue<string>(AppConstants.BaseUrlKey),
+
                 ValidateIssuerSigningKey = true,
-
-                ValidIssuer = "http://localhost:5000",
-                ValidAudience = "http://localhost:5000",
-
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("the secret that needs to be at least 16 characeters long for HmacSha256")),
-                ClockSkew = TimeSpan.FromMinutes(5) //5 minute tolerance for the expiration date
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AppConstants.TokenPrivateKey))
             };
         });
 
         /// ----- External logins - Facebook , Google  --------
 
-        //services.AddAuthentication().AddFacebook(options =>
-        //{
-        //    options.AppId = configuration["Authentication:Facebook:AppId"];
-        //    options.AppSecret = configuration["Authentication:Facebook:AppSecret"];
-        //});
+        services.AddAuthentication().AddFacebook(options =>
+        {
+            options.AppId = configuration["Authentication:Facebook:AppId"];
+            options.AppSecret = configuration["Authentication:Facebook:AppSecret"];
+        });
 
         services.AddAuthentication().AddGoogle(options =>
         {

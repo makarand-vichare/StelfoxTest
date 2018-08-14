@@ -25,5 +25,8 @@
         public const string EnglishLanguage = "en-us";
         public const string IrishLanguage = "ga";
 
+        public const string TokenPrivateKey = "Mak!1234VicExpenseTracker";
+        public const string BaseUrlKey = "BaseUrl";
+
     }
 }

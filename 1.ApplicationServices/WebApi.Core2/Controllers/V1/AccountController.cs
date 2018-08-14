@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Net.Core.IDomainServices.IdentityStores;
+using Net.Core.Utility;
 using Net.Core.ViewModels.Identity.WebApi;
 using System.Threading.Tasks;
 using WebApi.Core2.BindingModels;
@@ -11,10 +13,9 @@ namespace WebApi.Core2.Controllers.V1
     /// /reference http://bitoftech.net/2014/06/01/token-based-authentication-asp-net-web-api-2-owin-asp-net-identity/
     /// </summary>
 
-    //[Authorize]
     [ApiVersion("1.0")]
     [Produces("application/json")]
-    [Route("api/{culture=en}/[controller]")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class AccountController : BaseController
     {
         private UserManager<IdentityUserViewModel> userManager;
@@ -31,16 +32,15 @@ namespace WebApi.Core2.Controllers.V1
         }
 
         // POST api/Account/Register
-        //[AllowAnonymous]
-        [Route("Register")]
+        [Route("Register"), AllowAnonymous]
         [HttpPost]
-        public async Task<IActionResult> Register(RegisterBindingModel model)
+        public async Task<IActionResult> Register([FromBody]RegisterBindingModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-
+            model.Password = "Mak!123";
             var user = new IdentityUserViewModel() {
                             UserName = model.Email,
                             Email = model.Email,
@@ -53,14 +53,19 @@ namespace WebApi.Core2.Controllers.V1
 
             IdentityResult result = await userManager.CreateAsync(user, model.Password);
 
-            //IActionResult errorResult = GetErrorResult(result);
+            if (result.Succeeded)
+            {
+                result = await userManager.AddToRoleAsync(user, UserRoles.User.ToString());
+            }
 
-            //if (errorResult != null)
-            //{
-            //    return errorResult;
-            //}
+            IActionResult errorResult = GetErrorResult(result);
 
-            return Ok();
+            if (errorResult != null)
+            {
+                return errorResult;
+            }
+
+            return Ok(result.Succeeded);
         }
 
         // GET api/Account/ExternalLogin
@@ -208,34 +213,29 @@ namespace WebApi.Core2.Controllers.V1
 
         #region Helpers
 
-        //private IActionResult GetErrorResult(IdentityResult result)
-        //{
-        //    //if (result == null)
-        //    //{
-        //    //    return InternalServerError();
-        //    //}
+        private IActionResult GetErrorResult(IdentityResult result)
+        {
+            if (!result.Succeeded)
+            {
+                if (result.Errors != null)
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                }
 
-        //    if (!result.Succeeded)
-        //    {
-        //        if (result.Errors != null)
-        //        {
-        //            foreach (string error in result.Errors)
-        //            {
-        //                ModelState.AddModelError("", error);
-        //            }
-        //        }
+                if (ModelState.IsValid)
+                {
+                    // No ModelState errors are available to send, so just return an empty BadRequest.
+                    return BadRequest();
+                }
 
-        //        if (ModelState.IsValid)
-        //        {
-        //            // No ModelState errors are available to send, so just return an empty BadRequest.
-        //            return BadRequest();
-        //        }
+                return BadRequest(ModelState);
+            }
 
-        //        return BadRequest(ModelState);
-        //    }
-
-        //    return null;
-        //}
+            return null;
+        }
 
         //private string ValidateClientAndRedirectUri(HttpRequest request, ref string redirectUriOutput)
         //{

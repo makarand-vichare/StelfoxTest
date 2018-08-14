@@ -5,11 +5,14 @@ using Net.Core.IDomainServices.IdentityStores;
 using Net.Core.ViewModels;
 using Net.Core.ViewModels.Identity.WebApi;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Net.Core.Utility;
+using Microsoft.Extensions.Configuration;
 
 namespace WebApi.Core2.Controllers.V1
 {
@@ -20,12 +23,16 @@ namespace WebApi.Core2.Controllers.V1
     {
         private SignInManager<IdentityUserViewModel> signInManager;
         private UserManager<IdentityUserViewModel> userManager;
+        private IConfiguration configuration;
 
 
-        public AuthController(SignInManager<IdentityUserViewModel> _signInManager, UserManager<IdentityUserViewModel> _userManager)
+        public AuthController(SignInManager<IdentityUserViewModel> _signInManager, 
+                                UserManager<IdentityUserViewModel> _userManager,
+                                IConfiguration _configuration)
         {
                 signInManager = _signInManager;
                 userManager = _userManager;
+                configuration = _configuration;
          }
 
 
@@ -42,7 +49,10 @@ namespace WebApi.Core2.Controllers.V1
             if (result.Succeeded)
             {
                 var userRoles = await userManager.GetRolesAsync(new IdentityUserViewModel { Email = viewModel.Email});
-                var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("superSecretKey@345"));
+                var user = await userManager.FindByEmailAsync(viewModel.Email);
+                user.RoleName = userRoles.FirstOrDefault();
+
+                var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AppConstants.TokenPrivateKey));
                 var signinCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
 
                 var claims = new List<Claim>
@@ -52,15 +62,15 @@ namespace WebApi.Core2.Controllers.V1
                 };
 
                 var tokeOptions = new JwtSecurityToken(
-                    issuer: "http://localhost:5000",
-                    audience: "http://localhost:5000",
+                    issuer: configuration.GetValue<string>(AppConstants.BaseUrlKey),
+                    audience: configuration.GetValue<string>(AppConstants.BaseUrlKey),
                     claims: claims,
-                    expires: DateTime.Now.AddMinutes(5),
+                    expires: DateTime.Now.AddMinutes(350),
                     signingCredentials: signinCredentials
                 );
 
                 var tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
-                return Ok(new { Token = tokenString });
+                return Ok(new { Token = tokenString, UserInfo = user, IsAuth = true });
             }
             else
             {
