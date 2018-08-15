@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -52,19 +53,11 @@ namespace WebApi.Core2
             services.AddTransient<IUserStore<IdentityUserViewModel>, CustomUserStore>();
             services.AddTransient<IRoleStore<IdentityRoleViewModel>, CustomRoleStore>();
 
-            services.AddMvc(config =>
-            {
-                // Add XML Content Negotiation
-                config.RespectBrowserAcceptHeader = true;
-                config.InputFormatters.Add(new XmlSerializerInputFormatter());
-                config.OutputFormatters.Add(new XmlSerializerOutputFormatter());
-                config.OutputFormatters.Add(new CsvOutputFormatter());
-            });
-
+            services.ConfigureMvc();
             services.AddAutoMapper(Assembly.GetAssembly(typeof(ModelAutoMapperProfiler)));
-
             services.AddApiVersioning(o => o.ApiVersionReader = new HeaderApiVersionReader("api-version"));
             services.ConfigureCors();
+            services.ConfigureAntiforgeryToken();
             services.ConfigureLoggerService();
             services.ConfigureIISIntegration();
             services.ConfigureAuthentication(Configuration);
@@ -75,29 +68,19 @@ namespace WebApi.Core2
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IAntiforgery antiforgery, IHostingEnvironment env)
         {
-            app.ConfigureCustomExceptionMiddleware(env);
-            app.UseCors("CorsPolicy");
+            app.MiddlewareCustomException(env);
+            app.MiddlewareAntiforgery(antiforgery);
             app.UseAuthentication();
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.All
             });
-            if (env.IsDevelopment())
-            {
-                app.UseSwaggerUi(typeof(Startup).GetTypeInfo().Assembly, settings =>
-                {
-                    settings.GeneratorSettings.DefaultPropertyNameHandling = PropertyNameHandling.CamelCase;
-                });
-           }
-
+            app.MiddlewareSwagger(env);
+            app.UseCors("CorsPolicy");
             app.UseMvc();
-            app.Run(async (context) =>
-            {
-                context.Response.StatusCode = 404;
-                await context.Response.WriteAsync("Page not found");
-            });
+            app.MiddlewareRun();
         }
     }
 }

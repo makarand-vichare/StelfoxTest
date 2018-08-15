@@ -4,7 +4,7 @@ using WebApi.Core2.Middleware;
 
 public static class MiddlewareCustomExceptionExtension
 {
-    public static void ConfigureCustomExceptionMiddleware(this IApplicationBuilder app, IHostingEnvironment env)
+    public static void MiddlewareCustomException(this IApplicationBuilder app, IHostingEnvironment env)
     {
         if (env.IsDevelopment())
         {
